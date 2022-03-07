@@ -13,49 +13,86 @@ Sys.setenv(LANG = "en")
 library(rworldmap)
 library(rworldxtra)
 library(rjson)
-library(devtools)
 library(tidyverse)
-library(gutenbergr)
-library(DT)
-library(flextable)
-library(geonames)
 library(dplyr)
-library(geoparser)
-library(here)
-library(tidytext)
 library(tidyr)
 library(ggplot2)
 library(ggmap)
-library(stringr)
-library(sf)
-library(mapview)
-library(tmap)
-library(rnaturalearth)
-library(rnaturalearthdata)
-library(spacyr)
-library(maptools)
-library(rgeos)
-library(entity)
-library(tidygeocoder)
-library(osmdata)
-library(magrittr)
-library(readtext)
-library(raster)
-library(spatstat)
+library(flightplot)
+
 
 ```
 
 ```{r}
-amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/Project/Data and Code/GIUZ_AirTravel_20210509/AIRTRAVELS.csv")
+airports <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/airports.csv")
 
-airports <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/Project/Data and Code/GIUZ_AirTravel_20210509/airports.csv")
+amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/AIRTRAVELS.csv")
 
-world_poly <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/TM_WORLD_BORDERS_SIMPL-0/TM_WORLD_BORDERS_SIMPL-0.3.shp")
+world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/TM_WORLD_BORDERS_SIMPL-0 Kopie")
 
 ```
 
 ```{r}
-airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords))
+airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
+airports <- subset(airports, iata_code != "")
 
+airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
+
+amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
+                      dep_country = iso_country)
+amm <- left_join(amm,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm <- amm %>% rename(dep_coordinates = coordinates,
+                      dep_country = iso_country)
+amm <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm <- amm %>% rename(arr_coordinates = coordinates,
+                      arr_country = iso_country)
+
+```
+
+```{r}
+
+ggplot() +
+  geom_sf(data=world, lwd = .5)+
+  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
+  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
+  theme(panel.grid.minor = element_blank())+
+  ggtitle("Departure and arrival locations for all GIUZ flights separated by symbols")+
+  xlab("Longitude") + ylab("Latitude")
+
+```
+
+```{r}
+amm_arr <- st_as_sf(amm_arr)
+
+flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
+flightmap_sort <- flightmap %>% group_by(FIPS) %>% count()
+flightmap_sort
+
+library(RColorBrewer)
+palette = colorRampPalette(brewer.pal(n=51, name='Oranges'))(51)
+palette = c("white", palette)
+# create map
+ggplot() +
+  geom_sf(data=world, lwd = .02)+
+  geom_sf(data = flightmap_sort, aes(fill = n)) +
+  scale_fill_viridis_c() +
+  labs(fill = "Locations per country") +
+  theme(panel.grid.minor = element_blank())+
+  ggtitle("Arrival locations for all GIUZ flights counnted by country")+
+  xlab("Longitude") + ylab("Latitude")
+
+```
+
+
+```{r}
+flightpath <- cbind(amm$DEPARTURE_AIRPORT,
+                     amm$ARRIVAL_AIRPORT) %>% as.data.frame()
+flightpath <- flightpath %>% rename(Departure = V1,
+                                    Arrival = V2)
+flightpath <- subset(flightpath, Departure != "" & Arrival != "")
+
+
+plot_flights(flightpath)
 ```
 

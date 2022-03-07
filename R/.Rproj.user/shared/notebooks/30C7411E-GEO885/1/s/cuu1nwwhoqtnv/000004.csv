@@ -1,2 +1,0 @@
-"0","airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type))"
-"0",""
