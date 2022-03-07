@@ -1,0 +1,856 @@
+"AT_ID","DIVISION","Year","JOURNEY_TYPE_CODE","FLIGHT_CLASS","PASSENGER_TYPE_SHORT","TRAVEL_REASON_SHORT","DISTANCE_KM","EMISSIONS_KGCO2EQ"
+1,"PhysicalGeography",2017,2,"Economy","PhD candidate","conference, workshop",19684,4841
+2,"PhysicalGeography",2017,2,"Economy","professor","conference, workshop",19158,5494
+3,"PhysicalGeography",2017,1,"Economy","professor","conference, workshop",855,222
+4,"PhysicalGeography",2017,1,"Economy","professor","conference, workshop",654,130
+5,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",13212,2512
+6,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",1010,254
+7,"PhysicalGeography",2017,1,"Economy","guest","other",443,97
+8,"PhysicalGeography",2017,2,"Economy","guest","examination",988,210
+9,"PhysicalGeography",2017,2,"Economy","guest","other",1066,251
+10,"PhysicalGeography",2017,2,"Economy","guest","other",1510,350
+11,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",14914,4005
+12,"PhysicalGeography",2017,1,"Economy","professor","field work, excursion",1537,323
+13,"PhysicalGeography",2017,2,"Economy","professor","project meeting",3074,646
+14,"PhysicalGeography",2017,2,"Economy","professor","teaching",2808,659
+15,"PhysicalGeography",2017,2,"Economy","professor","field work, excursion",4124,894
+16,"PhysicalGeography",2017,1,"Economy","employee with PhD","field work, excursion",1537,323
+17,"PhysicalGeography",2017,1,"Economy","employee with PhD","field work, excursion",1828,474
+18,"PhysicalGeography",2017,2,"Economy","employee without PhD","teaching",2228,379
+19,"PhysicalGeography",2017,2,"Economy","employee without PhD","conference, workshop",12112,3253
+20,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",4012,871
+21,"PhysicalGeography",2017,1,"Economy","employee without PhD","teaching",1786,402
+22,"PhysicalGeography",2017,1,"Economy","employee without PhD","teaching",1451,319
+23,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",8499,1927
+24,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",8496,1789
+25,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",2062,447
+26,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",2948,638
+27,"PhysicalGeography",2017,1,"Economy","employee without PhD","project meeting",10017,2404
+28,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",3520,617
+29,"PhysicalGeography",2017,1,"Economy","employee without PhD","conference, workshop",8303,2458
+30,"PhysicalGeography",2017,1,"Economy","employee with PhD","project meeting",839,196
+31,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",19039,4896
+32,"PhysicalGeography",2017,1,"Economy","employee with PhD",,19070,5115
+33,"PhysicalGeography",2017,1,"Economy","employee with PhD","project meeting",533,126
+34,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",1308,259
+35,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",18116,4648
+36,"PhysicalGeography",2017,1,"Economy","employee with PhD","project meeting",533,126
+37,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",8742,2224
+38,"PhysicalGeography",2017,2,"Economy","employee with PhD","project meeting",16972,3789
+39,"PhysicalGeography",2017,2,"Economy","guest","conference, workshop",17610,4157
+40,"PhysicalGeography",2017,2,"Economy","employee without PhD","conference, workshop",1308,259
+41,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",23696,4950
+42,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",1268,266
+43,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",1268,266
+44,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",4124,894
+45,"PhysicalGeography",2017,2,"Economy","professor","other",17452,3797
+46,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",1009,239
+47,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",14112,3262
+48,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",4864,1181
+49,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",5472,1509
+50,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",8938,1843
+51,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",8938,1843
+52,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",1011,211
+53,"PhysicalGeography",2017,2,"Economy","professor","field work, excursion",8938,1843
+54,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",8938,1843
+55,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",8938,1843
+56,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",14914,2835
+57,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",14914,2835
+58,"PhysicalGeography",2017,2,"Economy","employee without PhD","teaching",2808,659
+59,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",22428,4685
+60,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",21724,5771
+61,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",572,133
+62,"PhysicalGeography",2017,1,"Economy","guest","field work, excursion",572,133
+63,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",1268,266
+64,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",1268,266
+65,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",22978,5286
+66,"PhysicalGeography",2017,2,"Economy","employee with PhD","field work, excursion",22978,5286
+67,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",15295,3414
+68,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",1268,266
+69,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",23696,4950
+70,"PhysicalGeography",2017,1,"Economy","employee with PhD","field work, excursion",11214,2342
+71,"PhysicalGeography",2017,1,"Economy","employee with PhD","field work, excursion",12822,2867
+72,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",23696,4950
+73,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",5140,1048
+74,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",1268,266
+75,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",1936,391
+76,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",634,133
+77,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",22978,5286
+78,"PhysicalGeography",2017,2,"Economy","professor","project meeting",3074,646
+79,"PhysicalGeography",2017,2,"Economy","employee with PhD","conference, workshop",1308,259
+80,"PhysicalGeography",2017,1,"Economy","employee with PhD","conference, workshop",1537,323
+81,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",22428,4685
+82,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",22428,4685
+83,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",22586,4752
+84,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",11214,2342
+85,"PhysicalGeography",2017,1,"Economy","employee without PhD","field work, excursion",9555,2419
+86,"PhysicalGeography",2017,2,"Economy","employee without PhD","field work, excursion",22428,4685
+87,"PhysicalGeography",2017,2,"Economy","guest","field work, excursion",1268,266
+88,"PhysicalGeography",2017,2,"Economy","employee without PhD","conference, workshop",1670,331
+89,"PhysicalGeography",2017,2,"Economy","employee with PhD","project meeting",16066,4001
+90,"PhysicalGeography",2017,2,"Economy","employee with PhD","project meeting",16066,4001
+91,"PhysicalGeography",2017,2,"Economy","employee with PhD","project meeting",1404,325
+92,"PhysicalGeography",2017,2,"Economy","employee with PhD","project meeting",2018,477
+93,"PhysicalGeography",2017,2,"Economy","employee with PhD","project meeting",2022,422
+94,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",12710,2882
+95,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",692,125
+96,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",2572,480
+97,"HumanGeography",2017,2,"Economy","employee with PhD","teaching",11100,2034
+98,"HumanGeography",2017,1,"Economy","employee with PhD","conference, workshop",808,218
+99,"HumanGeography",2017,1,"Economy","employee with PhD","conference, workshop",835,166
+100,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",1670,331
+101,"HumanGeography",2017,2,"Economy","PhD candidate","teaching",3074,646
+102,"HumanGeography",2017,2,"Economy","PhD candidate","conference, workshop",1716,366
+103,"HumanGeography",2017,2,"Economy","employee with PhD","field work, excursion",9328,2050
+104,"HumanGeography",2017,2,"Economy","PhD candidate","conference, workshop",15950,3361
+105,"HumanGeography",2017,2,"Economy","guest","conference, workshop",16306,3694
+106,"HumanGeography",2017,2,"Economy","guest","examination",2022,422
+107,"HumanGeography",2017,2,"Economy","professor","project meeting",16306,3694
+108,"HumanGeography",2017,1,"Economy","guest","conference, workshop",2435,517
+109,"HumanGeography",2017,1,"Economy","guest","conference, workshop",406,67
+110,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",16410,3654
+111,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",19454,4857
+112,"HumanGeography",2017,2,"Economy","guest","field work, excursion",16364,3657
+113,"HumanGeography",2017,1,"Economy","employee with PhD","field work, excursion",533,126
+114,"HumanGeography",2017,1,"Economy","employee with PhD","field work, excursion",921,307
+115,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",1120,184
+116,"HumanGeography",2017,1,"Economy","professor","field work, excursion",8445,1978
+117,"HumanGeography",2017,1,"Economy","professor","conference, workshop",3731,688
+118,"HumanGeography",2017,1,"Economy","professor","field work, excursion",6042,1514
+119,"HumanGeography",2017,2,"Economy","professor","conference, workshop",686,131
+120,"HumanGeography",2017,2,"Economy","PhD candidate","conference, workshop",1304,288
+121,"HumanGeography",2017,1,"Economy","professor","conference, workshop",652,144
+122,"HumanGeography",2017,2,"Economy","PhD candidate","conference, workshop",12084,3027
+123,"HumanGeography",2017,1,"Economy","PhD candidate","conference, workshop",710,142
+124,"HumanGeography",2017,1,"Economy","professor","conference, workshop",1222,322
+125,"HumanGeography",2017,1,"Economy","professor","conference, workshop",1054,220
+126,"HumanGeography",2017,2,"Economy","guest","teaching",1670,331
+127,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",23758,6299
+128,"HumanGeography",2017,1,"Economy","guest","other",20149,5026
+129,"HumanGeography",2017,1,"Economy","guest","other",19158,5495
+130,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",3346,740
+131,"HumanGeography",2017,2,"Economy","guest","examination",1420,283
+132,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",14372,3243
+133,"HumanGeography",2017,1,"Economy","guest","conference, workshop",2408,511
+134,"HumanGeography",2017,1,"Economy","guest","conference, workshop",2356,539
+135,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",12392,3072
+136,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",4190,762
+137,"HumanGeography",2017,1,"Economy","PhD candidate","field work, excursion",1484,318
+138,"HumanGeography",2017,2,"Economy","professor","conference, workshop",2572,480
+139,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",1102,248
+140,"HumanGeography",2017,2,"Economy","professor","conference, workshop",886,194
+141,"HumanGeography",2017,2,"Economy","professor","conference, workshop",20434,5417
+142,"HumanGeography",2017,1,"Economy","PhD candidate","conference, workshop",9579,2747
+143,"HumanGeography",2017,1,"Economy","PhD candidate","conference, workshop",9878,2786
+144,"HumanGeography",2017,2,"Economy","PhD candidate","conference, workshop",26178,5533
+145,"HumanGeography",2017,2,"Economy","professor","field work, excursion",15904,3602
+146,"HumanGeography",2017,2,"Economy","PhD candidate","field work, excursion",16482,3673
+147,"HumanGeography",2017,2,"Economy","PhD candidate","conference, workshop",1822,320
+148,"HumanGeography",2017,2,"Economy","PhD candidate","field work, excursion",13760,3280
+149,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",1304,288
+150,"HumanGeography",2017,2,"Economy","PhD candidate","field work, excursion",16194,4042
+151,"HumanGeography",2017,2,"Economy","employee without PhD","field work, excursion",24010,5931
+152,"HumanGeography",2017,2,"Economy","employee with PhD","conference, workshop",1670,331
+153,"HumanGeography",2017,2,"Economy","guest","field work, excursion",22978,5286
+154,"HumanGeography",2017,2,"Economy","guest","conference, workshop",1640,383
+155,"HumanGeography",2017,2,"Economy","PhD candidate","field work, excursion",13616,3239
+538,"PhysicalGeography",2018,2,"Economy","professor","project meeting",7478,1514
+539,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",258,21
+540,"PhysicalGeography",2018,1,"Economy","professor","project meeting",1395,282
+541,"PhysicalGeography",2018,2,"Economy","professor","conference, workshop",13438,2650
+542,"PhysicalGeography",2018,2,"Economy","unknown","conference, workshop",13438,2650
+543,"PhysicalGeography",2018,2,"Economy","professor","project meeting",2594,706
+544,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18444,4272
+545,"PhysicalGeography",2018,2,"Economy","professor","conference, workshop",16066,4001
+546,"PhysicalGeography",2018,2,"Economy","professor","conference, workshop",13438,2650
+547,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",1304,288
+548,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",7582,1604
+549,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",7062,1714
+550,"PhysicalGeography",2018,1,"Economy","unknown","conference, workshop",597,154
+551,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",4124,894
+552,"PhysicalGeography",2018,2,"Economy","professor","project meeting",1050,248
+553,"PhysicalGeography",2018,2,"Economy","professor","conference, workshop",1938,517
+554,"PhysicalGeography",2018,2,"Economy","professor","project meeting",4468,957
+555,"PhysicalGeography",2018,1,"Economy","unknown","conference, workshop",969,258
+156,"HumanGeography",2017,1,"Economy","guest","conference, workshop",17304,4334
+157,"HumanGeography",2017,1,"Economy","guest","conference, workshop",3074,646
+158,"HumanGeography",2017,1,"Economy","guest","conference, workshop",18816,4419
+159,"HumanGeography",2017,2,"Economy","guest","field work, excursion",13760,3280
+160,"HumanGeography",2017,2,"Economy","guest","conference, workshop",1798,423
+161,"HumanGeography",2017,2,"Economy","employee with PhD","field work, excursion",15898,3538
+162,"HumanGeography",2017,2,"Economy","employee with PhD","field work, excursion",16318,3325
+163,"GIScience",2017,2,"Economy","professor","conference, workshop",1304,288
+164,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",1304,288
+165,"GIScience",2017,2,"Economy","professor","conference, workshop",1066,251
+166,"GIScience",2017,2,"Economy","guest","conference, workshop",1810,338
+167,"GIScience",2017,2,"Economy","guest","conference, workshop",19474,5078
+168,"GIScience",2017,2,"Economy","guest","teaching",1304,288
+169,"GIScience",2017,2,"Economy","guest","teaching",1670,331
+170,"GIScience",2017,2,"Economy","guest","teaching",37080,9984
+171,"GIScience",2017,2,"Economy","guest","other",1214,410
+172,"GIScience",2017,2,"Economy","guest","other",1214,410
+173,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",690,133
+174,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",13438,2650
+175,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",988,210
+176,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",1304,288
+177,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",2108,440
+178,"GIScience",2017,2,"Economy","professor","conference, workshop",3514,773
+179,"GIScience",2017,2,"Economy","professor","conference, workshop",1304,288
+180,"GIScience",2017,2,"Economy","professor","conference, workshop",13438,2650
+181,"GIScience",2017,2,"Economy","professor","conference, workshop",1670,331
+182,"GIScience",2017,2,"Economy","employee with PhD","other",1146,266
+183,"GIScience",2017,2,"Economy","guest","teaching",12084,3027
+184,"GIScience",2017,2,"Economy","guest","conference, workshop",19068,4949
+185,"GIScience",2017,1,"Economy","PhD candidate","conference, workshop",690,133
+186,"GIScience",2017,2,"Economy","professor","conference, workshop",1304,288
+187,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",1810,338
+188,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",13438,2650
+189,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",2022,422
+190,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",13438,2650
+191,"GIScience",2017,2,"Economy","professor","conference, workshop",1486,344
+192,"GIScience",2017,2,"Economy","professor","conference, workshop",12112,3253
+193,"GIScience",2017,2,"Economy","professor","conference, workshop",1486,344
+194,"GIScience",2017,2,"Economy","employee with PhD","conference, workshop",1304,288
+195,"GIScience",2017,2,"Economy","professor","conference, workshop",13438,2650
+196,"GIScience",2017,2,"Economy","guest","examination",1504,349
+197,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",1670,331
+198,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",13438,2650
+199,"GIScience",2017,2,"Economy","PhD candidate","conference, workshop",1486,344
+200,"GIScience",2017,2,"Economy","guest","conference, workshop",13438,2650
+201,"GIScience",2017,2,"Economy","guest","conference, workshop",12736,2986
+202,"RemoteSensing",2017,2,"Economy","professor","conference, workshop",8312,1677
+203,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1484,285
+204,"RemoteSensing",2017,2,"Economy","professor","conference, workshop",1420,283
+205,"RemoteSensing",2017,2,"Economy","professor","project meeting",1484,285
+206,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",1670,331
+207,"RemoteSensing",2017,2,"Economy","employee without PhD","project meeting",1484,285
+208,"RemoteSensing",2017,2,"Economy","guest","teaching",3970,846
+209,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1304,288
+210,"RemoteSensing",2017,2,"Economy","professor","conference, workshop",988,210
+211,"RemoteSensing",2017,2,"Economy","professor","project meeting",1304,288
+212,"RemoteSensing",2017,2,"Economy","professor","project meeting",1484,285
+213,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",1304,288
+214,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1304,288
+215,"RemoteSensing",2017,2,"Economy","professor","project meeting",1420,283
+216,"RemoteSensing",2017,2,"Economy","PhD candidate","conference, workshop",17376,4415
+217,"RemoteSensing",2017,1,"Economy","employee with PhD","project meeting",652,144
+218,"RemoteSensing",2017,1,"Economy","employee with PhD","project meeting",610,181
+219,"RemoteSensing",2017,1,"Economy","employee with PhD","project meeting",652,144
+220,"RemoteSensing",2017,1,"Economy","employee with PhD","project meeting",610,181
+221,"RemoteSensing",2017,2,"Economy","guest","teaching",1822,320
+222,"RemoteSensing",2017,1,"Economy","guest","teaching",929,193
+223,"RemoteSensing",2017,1,"Economy","guest","teaching",7101,1478
+224,"RemoteSensing",2017,1,"Economy","guest","teaching",525,129
+225,"RemoteSensing",2017,1,"Economy","guest","teaching",6254,1255
+226,"RemoteSensing",2017,1,"Economy","guest","teaching",1165,237
+227,"RemoteSensing",2017,1,"Economy","guest","teaching",1474,319
+228,"RemoteSensing",2017,1,"Economy","guest","teaching",1474,319
+229,"RemoteSensing",2017,1,"Economy","guest","teaching",1165,237
+230,"RemoteSensing",2017,2,"Economy","guest","teaching",1046,243
+231,"RemoteSensing",2017,2,"Economy","guest","teaching",1304,288
+232,"RemoteSensing",2017,2,"Economy","professor","other",1304,288
+233,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",1484,285
+234,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",1484,285
+235,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",1484,285
+236,"RemoteSensing",2017,1,"Economy","employee with PhD","field work, excursion",9363,2080
+237,"RemoteSensing",2017,1,"Economy","employee with PhD","field work, excursion",9442,2382
+238,"RemoteSensing",2017,1,"Economy","employee with PhD","field work, excursion",443,97
+239,"RemoteSensing",2017,1,"Economy","employee with PhD","field work, excursion",652,144
+240,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1484,285
+241,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1484,285
+242,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1484,285
+243,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",12084,3027
+244,"RemoteSensing",2017,1,"Economy","employee with PhD","project meeting",555,109
+245,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1304,288
+246,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1484,285
+247,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1484,285
+248,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1670,331
+249,"RemoteSensing",2017,2,"Economy","PhD candidate","project meeting",1670,331
+250,"RemoteSensing",2017,2,"Economy","employee with PhD","conference, workshop",1484,285
+251,"RemoteSensing",2017,2,"Economy","employee with PhD","project meeting",1670,331
+252,"RemoteSensing",2017,1,"Economy","PhD candidate","field work, excursion",9421,2717
+253,"RemoteSensing",2017,1,"Economy","PhD candidate","field work, excursion",6536,1455
+254,"RemoteSensing",2017,1,"Economy","PhD candidate","conference, workshop",10892,2481
+255,"RemoteSensing",2017,1,"Economy","PhD candidate","conference, workshop",5973,1118
+256,"RemoteSensing",2017,1,"Economy","PhD candidate","conference, workshop",14221,3503
+257,"RemoteSensing",2017,1,"Economy","PhD candidate","conference, workshop",7047,1613
+258,"RemoteSensing",2017,1,"Economy","PhD candidate","conference, workshop",15410,4259
+259,"RemoteSensing",2017,1,"Economy","PhD candidate","conference, workshop",2253,514
+260,"RemoteSensing",2017,2,"Economy","guest","teaching",1888,416
+261,"RemoteSensing",2017,1,"Economy","guest","teaching",443,97
+262,"RemoteSensing",2017,2,"Economy","professor","project meeting",1304,288
+263,"PhysicalGeography",2019,1,"Economy","employee with PhD","project meeting",858,201
+264,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",18842,5434
+265,"PhysicalGeography",2019,1,"Economy","employee without PhD","conference, workshop",9421,2717
+266,"PhysicalGeography",2019,1,"Economy","employee without PhD","project meeting",9579,2747
+267,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",1304,288
+268,"PhysicalGeography",2019,2,"Economy","employee without PhD","conference, workshop",1304,288
+269,"PhysicalGeography",2019,2,"Economy","employee without PhD","other",988,210
+270,"PhysicalGeography",2019,2,"Economy","employee without PhD","field work, excursion",20158,5035
+271,"PhysicalGeography",2019,2,"Economy","employee without PhD","field work, excursion",20158,5035
+272,"PhysicalGeography",2019,2,"Economy","employee with PhD","project meeting",2430,559
+273,"PhysicalGeography",2019,2,"Economy","employee without PhD","project meeting",2430,559
+274,"PhysicalGeography",2019,2,"Economy","employee without PhD","project meeting",2430,559
+275,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",15164,3207
+276,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",14958,3586
+277,"PhysicalGeography",2019,2,"Economy","professor","project meeting",3074,646
+278,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",8087,2018
+279,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",1050,248
+280,"PhysicalGeography",2019,2,"Economy","professor","conference, workshop",1938,517
+281,"PhysicalGeography",2019,2,"Economy","professor","field work, excursion",3074,646
+282,"PhysicalGeography",2019,2,"Economy","professor","field work, excursion",3074,646
+283,"PhysicalGeography",2019,1,"Economy","professor","conference, workshop",1511,322
+284,"PhysicalGeography",2019,1,"Economy","professor","project meeting",1537,323
+285,"PhysicalGeography",2019,2,"Economy","guest","other",2948,638
+286,"PhysicalGeography",2019,1,"Economy","employee with PhD","other",1374,384
+287,"PhysicalGeography",2019,1,"Economy","employee with PhD","other",1904,440
+288,"PhysicalGeography",2019,2,"Economy","guest","examination",2370,403
+289,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",12150,2818
+290,"PhysicalGeography",2019,2,"Economy","professor","project meeting",11182,2134
+291,"PhysicalGeography",2019,2,"Economy","employee with PhD","project meeting",11576,2216
+292,"PhysicalGeography",2019,1,"Economy","employee with PhD","project meeting",11879,3150
+293,"PhysicalGeography",2019,1,"Economy","employee with PhD","project meeting",12507,3549
+294,"PhysicalGeography",2019,1,"Economy","employee with PhD","project meeting",2086,422
+295,"PhysicalGeography",2019,1,"Economy","guest","conference, workshop",9077,2163
+296,"PhysicalGeography",2019,1,"Economy","guest","conference, workshop",8361,2104
+297,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",35316,10018
+298,"PhysicalGeography",2019,2,"Economy","guest","other",14698,3130
+299,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",17572,3958
+300,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",11182,2134
+301,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",14852,2931
+302,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",2948,638
+303,"PhysicalGeography",2019,1,"Economy","employee with PhD","field work, excursion",4469,922
+304,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+305,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+306,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+307,"PhysicalGeography",2019,1,"Economy","professor","field work, excursion",4469,922
+308,"PhysicalGeography",2019,1,"Economy","professor","field work, excursion",4469,922
+309,"PhysicalGeography",2019,1,"Economy","employee with PhD","field work, excursion",4469,922
+310,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+311,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+312,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+313,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+314,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+315,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+316,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",4469,922
+317,"PhysicalGeography",2019,1,"Economy","professor","field work, excursion",3771,761
+318,"PhysicalGeography",2019,1,"Economy","employee with PhD","field work, excursion",3771,761
+319,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+320,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+321,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+322,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+323,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+324,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+325,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+326,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+327,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+328,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+329,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+330,"PhysicalGeography",2019,1,"Economy","employee without PhD","field work, excursion",3771,761
+331,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",12150,2818
+332,"PhysicalGeography",2019,1,"Economy","professor","conference, workshop",6378,2037
+333,"PhysicalGeography",2019,1,"Economy","professor","conference, workshop",6056,1626
+334,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",12112,3253
+335,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",17376,4415
+336,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",17376,4415
+337,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",3872,782
+338,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",21710,5021
+339,"PhysicalGeography",2019,2,"Economy","guest","other",5018,1019
+340,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",21710,5020
+341,"PhysicalGeography",2019,2,"Economy","guest","project meeting",3872,782
+342,"PhysicalGeography",2019,2,"Economy","guest","project meeting",5018,1019
+343,"PhysicalGeography",2019,2,"Economy","guest","project meeting",18266,4147
+344,"PhysicalGeography",2019,1,"Economy","professor","project meeting",11491,2810
+345,"PhysicalGeography",2019,1,"Economy","professor","project meeting",11214,2342
+346,"PhysicalGeography",2019,1,"Economy","employee with PhD","conference, workshop",7587,1589
+347,"PhysicalGeography",2019,1,"Economy","employee with PhD","conference, workshop",7201,1551
+348,"PhysicalGeography",2019,2,"Economy","guest","project meeting",12392,3072
+349,"PhysicalGeography",2019,2,"Economy","guest","project meeting",12392,3072
+350,"PhysicalGeography",2019,2,"Economy","guest","project meeting",12392,3072
+351,"PhysicalGeography",2019,2,"Economy","guest","project meeting",12392,3072
+352,"PhysicalGeography",2019,2,"Economy","guest","project meeting",12392,3072
+353,"PhysicalGeography",2019,2,"Economy","guest","project meeting",12392,3072
+354,"PhysicalGeography",2019,2,"Economy","guest","project meeting",16458,3954
+355,"PhysicalGeography",2019,1,"Economy","employee with PhD","project meeting",5591,1067
+356,"PhysicalGeography",2019,1,"Economy","employee with PhD","field work, excursion",8033,2001
+357,"PhysicalGeography",2019,1,"Economy","employee with PhD","field work, excursion",3221,679
+358,"PhysicalGeography",2019,1,"Economy","employee with PhD","conference, workshop",6785,1466
+359,"PhysicalGeography",2019,1,"Economy","employee with PhD","conference, workshop",6533,1352
+360,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",10580,2367
+361,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",17596,4346
+362,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",17552,4367
+363,"PhysicalGeography",2019,2,"Economy","professor","conference, workshop",1308,259
+364,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",1308,259
+365,"PhysicalGeography",2019,2,"Economy","employee without PhD","conference, workshop",1308,259
+366,"PhysicalGeography",2019,2,"Economy","employee without PhD","conference, workshop",1308,259
+367,"PhysicalGeography",2019,2,"Economy","employee without PhD","field work, excursion",15128,3526
+368,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",2430,559
+369,"PhysicalGeography",2019,2,"Economy","professor","conference, workshop",18842,5434
+370,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",1308,259
+371,"PhysicalGeography",2019,2,"Economy","employee with PhD","field work, excursion",20662,5219
+372,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",3902,805
+373,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",3902,805
+374,"PhysicalGeography",2019,2,"Economy","guest","field work, excursion",3872,782
+375,"PhysicalGeography",2019,2,"Economy","employee without PhD","field work, excursion",2276,528
+376,"PhysicalGeography",2019,2,"Economy","employee without PhD","field work, excursion",2276,528
+377,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",12392,3072
+378,"PhysicalGeography",2019,2,"Economy","employee with PhD","conference, workshop",12392,3072
+379,"PhysicalGeography",2019,2,"Economy","guest","other",12338,3320
+380,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",8826,2010
+381,"PhysicalGeography",2019,2,"Economy","guest","project meeting",13848,3285
+382,"PhysicalGeography",2019,2,"Economy","guest","conference, workshop",17738,4447
+383,"PhysicalGeography",2019,2,"Economy","guest","other",12392,3072
+384,"PhysicalGeography",2019,1,"Economy","guest","project meeting",10787,2170
+385,"PhysicalGeography",2019,2,"Economy","guest","project meeting",13642,2976
+386,"PhysicalGeography",2019,2,"Economy","guest","project meeting",14264,2892
+387,"PhysicalGeography",2019,2,"Economy","guest","project meeting",10570,2094
+388,"PhysicalGeography",2019,2,"Economy","guest","project meeting",19056,4598
+389,"PhysicalGeography",2019,2,"Economy","guest","project meeting",2508,574
+390,"PhysicalGeography",2019,2,"Economy","guest","project meeting",4806,1022
+391,"PhysicalGeography",2019,2,"Economy","guest","project meeting",6348,1642
+392,"PhysicalGeography",2019,2,"Economy","guest","project meeting",1844,181
+393,"PhysicalGeography",2019,2,"Economy","guest","project meeting",1458,378
+394,"HumanGeography",2019,1,"Economy","PhD candidate","conference, workshop",1177,292
+395,"HumanGeography",2019,1,"Economy","PhD candidate","conference, workshop",1367,322
+396,"HumanGeography",2019,2,"Economy","professor","teaching",2022,422
+397,"HumanGeography",2019,2,"Economy","PhD candidate","field work, excursion",16306,3694
+398,"HumanGeography",2019,2,"Economy","employee with PhD","teaching",2022,422
+399,"HumanGeography",2019,1,"Economy","PhD candidate","teaching",1011,211
+400,"HumanGeography",2019,2,"Economy","professor","teaching",1484,318
+401,"HumanGeography",2019,1,"Economy","PhD candidate","field work, excursion",264,40
+402,"HumanGeography",2019,1,"Economy","PhD candidate","teaching",2125,449
+403,"HumanGeography",2019,1,"Economy","PhD candidate","teaching",1011,211
+404,"HumanGeography",2019,1,"Economy","employee with PhD","teaching",1011,211
+405,"HumanGeography",2019,1,"Economy","employee with PhD","teaching",406,75
+406,"HumanGeography",2019,1,"Economy","employee with PhD","teaching",710,142
+407,"HumanGeography",2019,2,"Economy","guest","examination",2594,706
+408,"HumanGeography",2019,2,"Economy","guest","teaching",1670,331
+409,"HumanGeography",2019,2,"Economy","employee without PhD","field work, excursion",15904,3602
+410,"HumanGeography",2019,2,"Economy","employee without PhD","field work, excursion",17056,3603
+411,"HumanGeography",2019,2,"Economy","guest","conference, workshop",20700,5840
+412,"HumanGeography",2019,2,"Economy","employee with PhD","field work, excursion",9328,2050
+413,"HumanGeography",2019,2,"Economy","guest","teaching",2022,422
+414,"HumanGeography",2019,2,"Economy","PhD candidate","conference, workshop",2800,774
+415,"HumanGeography",2019,2,"Economy","PhD candidate","conference, workshop",1616,435
+416,"HumanGeography",2019,2,"Economy","employee without PhD","field work, excursion",12084,3027
+417,"HumanGeography",2019,2,"Economy","guest","other",16306,3694
+418,"HumanGeography",2019,2,"Economy","employee with PhD","field work, excursion",1270,295
+419,"HumanGeography",2019,2,"Economy","employee with PhD","field work, excursion",3712,774
+420,"HumanGeography",2019,2,"Economy","professor","conference, workshop",1308,259
+421,"HumanGeography",2019,1,"Economy","PhD candidate","conference, workshop",1907,498
+422,"HumanGeography",2019,1,"Economy","PhD candidate","conference, workshop",1907,498
+423,"HumanGeography",2019,2,"Economy","PhD candidate","conference, workshop",13438,2650
+424,"HumanGeography",2019,2,"Economy","employee with PhD","conference, workshop",1304,288
+425,"HumanGeography",2019,1,"Economy","employee with PhD","conference, workshop",808,218
+426,"HumanGeography",2019,1,"Economy","employee with PhD","conference, workshop",835,166
+427,"HumanGeography",2019,2,"Economy","employee with PhD","conference, workshop",1484,318
+428,"HumanGeography",2019,2,"Economy","PhD candidate","conference, workshop",16972,3789
+429,"HumanGeography",2019,1,"Economy","professor","conference, workshop",1343,341
+430,"HumanGeography",2019,1,"Economy","professor","conference, workshop",8470,1995
+431,"HumanGeography",2019,1,"Economy","professor","conference, workshop",6880,2132
+432,"HumanGeography",2019,2,"Economy","guest","teaching",1810,338
+433,"HumanGeography",2019,2,"Economy","guest","teaching",2444,573
+434,"HumanGeography",2019,2,"Economy","guest","examination",1610,375
+435,"HumanGeography",2019,2,"Economy","guest","teaching",2022,422
+436,"HumanGeography",2019,2,"Economy","guest","teaching",2572,480
+437,"HumanGeography",2019,2,"Economy","guest","teaching",2572,480
+438,"HumanGeography",2019,2,"Economy","guest","field work, excursion",10614,2332
+439,"HumanGeography",2019,1,"Economy","guest","field work, excursion",6764,1607
+440,"HumanGeography",2019,1,"Economy","guest","field work, excursion",8401,1835
+441,"HumanGeography",2019,2,"Economy","guest","field work, excursion",15950,3361
+442,"HumanGeography",2019,2,"Economy","guest","teaching",1670,331
+443,"HumanGeography",2019,2,"Economy","guest","teaching",1716,402
+444,"HumanGeography",2019,2,"Economy","guest","teaching",14074,3373
+445,"HumanGeography",2019,2,"Economy","guest","teaching",2306,534
+446,"HumanGeography",2019,2,"Economy","PhD candidate","conference, workshop",13438,2650
+447,"HumanGeography",2019,2,"Economy","employee with PhD","conference, workshop",13438,2650
+448,"HumanGeography",2019,1,"Economy","PhD candidate","field work, excursion",8205,1827
+449,"HumanGeography",2019,2,"Economy","PhD candidate","field work, excursion",16410,3654
+450,"HumanGeography",2019,1,"Economy","employee with PhD","conference, workshop",2435,517
+451,"HumanGeography",2019,2,"Economy","guest","conference, workshop",17522,3869
+452,"HumanGeography",2019,2,"Economy","guest","conference, workshop",17060,3741
+453,"HumanGeography",2019,2,"Economy","guest","conference, workshop",1462,355
+454,"HumanGeography",2019,2,"Economy","guest","conference, workshop",16194,4042
+455,"HumanGeography",2019,2,"Economy","guest","field work, excursion",16410,3654
+456,"GIScience",2019,2,"Economy","PhD candidate","conference, workshop",12120,2809
+457,"GIScience",2019,2,"Economy","PhD candidate","conference, workshop",15648,3869
+458,"GIScience",2019,2,"Economy","PhD candidate","conference, workshop",16924,5050
+459,"GIScience",2019,2,"Economy","professor","conference, workshop",3656,949
+460,"GIScience",2019,2,"Economy","professor","conference, workshop",1214,410
+461,"GIScience",2019,2,"Economy","professor","conference, workshop",506,86
+462,"GIScience",2019,2,"Economy","professor","conference, workshop",506,86
+463,"GIScience",2019,2,"Economy","professor","conference, workshop",2020,478
+464,"GIScience",2019,2,"Economy","guest","conference, workshop",2594,706
+465,"GIScience",2019,2,"Economy","guest","conference, workshop",3540,683
+466,"GIScience",2019,2,"Economy","guest","conference, workshop",1616,435
+467,"GIScience",2019,2,"Economy","guest","conference, workshop",1616,435
+468,"GIScience",2019,2,"Economy","guest","conference, workshop",12112,3253
+469,"GIScience",2019,2,"Economy","guest","conference, workshop",2386,448
+470,"GIScience",2019,2,"Economy","guest","conference, workshop",1304,288
+471,"GIScience",2019,2,"Economy","guest","conference, workshop",1616,435
+472,"GIScience",2019,2,"Economy","guest","conference, workshop",1616,435
+473,"GIScience",2019,1,"Economy","employee with PhD","conference, workshop",19296,5021
+474,"GIScience",2019,1,"Economy","employee with PhD","conference, workshop",16066,4001
+475,"GIScience",2019,1,"Economy","employee with PhD","conference, workshop",19296,5021
+476,"GIScience",2019,1,"Economy","employee with PhD","conference, workshop",13438,2650
+477,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",13438,2650
+478,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",690,133
+479,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",690,133
+480,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",1308,259
+481,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",37080,9984
+482,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",690,133
+483,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",19296,5021
+484,"GIScience",2019,2,"Economy","professor","conference, workshop",19296,5021
+485,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",1420,283
+486,"GIScience",2019,2,"Economy","employee with PhD","conference, workshop",1420,283
+487,"GIScience",2019,2,"Economy","professor","conference, workshop",1050,258
+488,"RemoteSensing",2019,2,"Economy","professor","project meeting",19158,5494
+489,"RemoteSensing",2019,2,"Business","professor","conference, workshop",18652,5467
+490,"RemoteSensing",2019,2,"Economy","guest","teaching",1938,517
+491,"RemoteSensing",2019,2,"Economy","guest","teaching",12112,3253
+492,"RemoteSensing",2019,2,"Economy","guest","other",13438,2650
+493,"RemoteSensing",2019,2,"Economy","guest","teaching",3126,653
+494,"RemoteSensing",2019,2,"Economy","employee with PhD","conference, workshop",1484,285
+495,"RemoteSensing",2019,2,"Economy","employee with PhD","field work, excursion",2880,587
+496,"RemoteSensing",2019,1,"Economy","employee with PhD","field work, excursion",1193,224
+497,"RemoteSensing",2019,1,"Economy","employee with PhD","field work, excursion",6559,1512
+498,"RemoteSensing",2019,1,"Economy","employee with PhD","field work, excursion",3854,838
+499,"RemoteSensing",2019,1,"Economy","employee with PhD","conference, workshop",4508,959
+500,"RemoteSensing",2019,1,"Economy","employee with PhD","conference, workshop",13536,4035
+501,"RemoteSensing",2019,1,"Economy","employee with PhD","conference, workshop",27697,7594
+502,"RemoteSensing",2019,2,"Economy","PhD candidate","conference, workshop",19284,5683
+503,"RemoteSensing",2019,2,"Economy","employee with PhD","conference, workshop",19284,5683
+504,"RemoteSensing",2019,2,"Economy","employee with PhD","project meeting",1484,285
+505,"RemoteSensing",2019,2,"Economy","employee with PhD","project meeting",1304,288
+506,"RemoteSensing",2019,2,"Economy","employee with PhD","project meeting",1484,285
+507,"RemoteSensing",2019,1,"Economy","employee with PhD","conference, workshop",6536,1455
+508,"RemoteSensing",2019,1,"Economy","employee with PhD","conference, workshop",6042,1514
+509,"RemoteSensing",2019,2,"Economy","employee with PhD","conference, workshop",13438,2650
+510,"RemoteSensing",2019,2,"Economy","employee with PhD","conference, workshop",20880,4061
+511,"RemoteSensing",2019,2,"Economy","professor","project meeting",1142,265
+512,"RemoteSensing",2019,2,"Economy","guest","project meeting",36870,9177
+513,"RemoteSensing",2019,2,"Economy","professor","field work, excursion",16304,4077
+514,"RemoteSensing",2019,2,"Economy","professor","project meeting",1142,265
+515,"RemoteSensing",2019,2,"Economy","professor","project meeting",1810,338
+516,"RemoteSensing",2019,2,"Economy","professor","project meeting",2022,422
+517,"RemoteSensing",2019,2,"Economy","PhD candidate","project meeting",25864,7586
+518,"RemoteSensing",2019,1,"Economy","PhD candidate","conference, workshop",3721,706
+519,"RemoteSensing",2019,2,"Economy","PhD candidate","project meeting",25864,7586
+520,"RemoteSensing",2019,2,"Economy","professor","project meeting",19158,5494
+521,"RemoteSensing",2019,2,"Economy","professor","project meeting",26246,7739
+522,"RemoteSensing",2019,2,"Economy","professor","field work, excursion",12710,2882
+523,"RemoteSensing",2019,2,"Economy","professor","field work, excursion",18048,4627
+524,"RemoteSensing",2019,1,"Economy","guest","project meeting",9449,2230
+525,"RemoteSensing",2019,1,"Economy","guest","project meeting",9207,2825
+526,"RemoteSensing",2019,2,"Economy","employee with PhD","conference, workshop",20880,4061
+527,"RemoteSensing",2019,2,"Economy","professor","other",4446,994
+528,"RemoteSensing",2019,2,"Economy","PhD candidate","field work, excursion",13616,3239
+529,"RemoteSensing",2019,2,"Economy","employee with PhD","field work, excursion",13616,3239
+530,"RemoteSensing",2019,2,"Economy","professor","other",19158,5494
+531,"RemoteSensing",2019,1,"Economy","professor","other",16009,3694
+532,"RemoteSensing",2019,1,"Economy","professor","other",12861,3273
+533,"RemoteSensing",2019,2,"Economy","professor","other",20016,5250
+534,"RemoteSensing",2019,2,"Economy","professor","other",22726,6092
+535,"RemoteSensing",2019,2,"Economy","PhD candidate","other",13616,3239
+536,"Support&Mangement",2017,0,,,,0,0
+537,"Support&Mangement",2019,0,,,,0,0
+556,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",1880,411
+557,"PhysicalGeography",2018,2,"Economy","professor","project meeting",3074,646
+558,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",2472,531
+559,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",15950,3361
+560,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",15950,3361
+561,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",15904,3602
+562,"PhysicalGeography",2018,2,"Economy","professor","project meeting",8204,1767
+563,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",8204,1767
+564,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",8204,1767
+565,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",8204,1767
+566,"PhysicalGeography",2018,2,"Economy","professor","project meeting",22428,4685
+567,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",21724,5771
+568,"PhysicalGeography",2018,2,"Economy","professor","project meeting",1268,266
+569,"PhysicalGeography",2018,2,"Economy","professor","project meeting",1268,266
+570,"PhysicalGeography",2018,2,"Economy","professor","project meeting",1268,266
+571,"PhysicalGeography",2018,2,"Economy","professor","project meeting",1268,266
+572,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",5018,1019
+573,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",3872,782
+574,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",2758,555
+575,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",2376,536
+576,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",1076,224
+577,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",2262,426
+578,"PhysicalGeography",2018,2,"Economy","professor","project meeting",22428,4685
+579,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",17478,3934
+580,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",22428,4685
+581,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",10855,2510
+582,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",7896,1911
+583,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",9105,2080
+584,"PhysicalGeography",2018,2,"Economy","unknown","conference, workshop",16744,3728
+585,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",516,42
+586,"PhysicalGeography",2018,2,"Economy","professor","project meeting",516,42
+587,"PhysicalGeography",2018,2,"Economy","professor","project meeting",13008,3438
+588,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",13008,3438
+589,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",5018,1019
+590,"PhysicalGeography",2018,1,"Economy","unknown","conference, workshop",5472,1509
+591,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",3326,685
+592,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",17078,4197
+593,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",2948,638
+594,"PhysicalGeography",2018,2,"Economy","professor","project meeting",18842,5434
+595,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18842,5434
+596,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18842,5434
+597,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18842,5434
+598,"PhysicalGeography",2018,2,"Economy","professor","project meeting",18842,5434
+599,"PhysicalGeography",2018,2,"Economy","unknown","conference, workshop",1308,259
+600,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",8227,1688
+601,"PhysicalGeography",2018,1,"Economy","unknown","project meeting",7865,2051
+602,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",16454,3376
+603,"PhysicalGeography",2018,2,"Economy","professor","project meeting",15528,3989
+604,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",15528,3989
+605,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18244,4425
+606,"PhysicalGeography",2018,2,"Economy","unknown","conference, workshop",1374,326
+607,"PhysicalGeography",2018,2,"Economy","professor","project meeting",14744,3491
+608,"PhysicalGeography",2018,2,"Economy","unknown","conference, workshop",1308,259
+609,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",12392,3072
+610,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",12392,3072
+611,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",15904,3602
+612,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18724,4242
+613,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18724,4242
+614,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",18724,4242
+615,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",3006,498
+616,"PhysicalGeography",2018,2,"Economy","unknown","project meeting",14274,2956
+617,"HumanGeography",2018,1,"Economy","employee with PhD","field work, excursion",8205,1827
+618,"HumanGeography",2018,1,"Economy","employee with PhD","field work, excursion",8097,2021
+619,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",16194,4042
+620,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1420,283
+621,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",13760,3280
+622,"HumanGeography",2018,2,"Economy","PhD candidate","conference, workshop",16608,3616
+623,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1670,331
+624,"HumanGeography",2018,1,"Economy","PhD candidate","other",6424,1509
+625,"HumanGeography",2018,1,"Economy","guest","field work, excursion",9579,2777
+626,"HumanGeography",2018,1,"Economy","guest","field work, excursion",16962,4050
+627,"HumanGeography",2018,1,"Economy","PhD candidate","field work, excursion",8205,1827
+628,"HumanGeography",2018,2,"Economy","guest","field work, excursion",15760,3905
+629,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1304,288
+630,"HumanGeography",2018,1,"Economy","PhD candidate","conference, workshop",1898,414
+631,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1214,410
+632,"HumanGeography",2018,2,"Economy","employee with PhD","field work, excursion",16410,3654
+633,"HumanGeography",2018,2,"Economy","guest","conference, workshop",20330,4853
+634,"HumanGeography",2018,2,"Economy","guest","conference, workshop",16338,3785
+635,"HumanGeography",2018,2,"Economy","guest","conference, workshop",16194,4042
+636,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1610,375
+637,"HumanGeography",2018,2,"Economy","guest","conference, workshop",16338,3785
+638,"HumanGeography",2018,2,"Economy","PhD candidate","teaching",15722,3557
+639,"HumanGeography",2018,2,"Business","professor","teaching",15904,3602
+640,"HumanGeography",2018,1,"Economy","professor","teaching",206,34
+641,"HumanGeography",2018,2,"Economy","PhD candidate","conference, workshop",1716,402
+642,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",1670,331
+643,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",1670,331
+644,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",13438,2650
+645,"HumanGeography",2018,1,"Economy","employee with PhD","conference, workshop",8688,2208
+646,"HumanGeography",2018,1,"Economy","employee with PhD","project meeting",8354,1894
+647,"HumanGeography",2018,2,"Economy","guest","conference, workshop",11114,2520
+648,"HumanGeography",2018,2,"Economy","guest","other",13760,3280
+649,"HumanGeography",2018,2,"Economy","guest","other",38330,10981
+650,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",16410,3654
+651,"HumanGeography",2018,2,"Economy","guest","field work, excursion",18672,4322
+652,"HumanGeography",2018,2,"Economy","guest","field work, excursion",9672,2106
+653,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",18724,4242
+654,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",1066,251
+655,"HumanGeography",2018,1,"economy","guest","field work, excursion",5341,1193
+656,"HumanGeography",2018,1,"economy","guest","field work, excursion",5869,1306
+657,"HumanGeography",2018,1,"economy","professor","field work, excursion",11422,3119
+658,"HumanGeography",2018,1,"economy","professor","field work, excursion",11879,3150
+659,"HumanGeography",2018,2,"economy","professor","field work, excursion",1084,165
+660,"HumanGeography",2018,2,"economy","professor","field work, excursion",1400,280
+661,"HumanGeography",2018,2,"Economy","professor","field work, excursion",19300,5491
+662,"HumanGeography",2018,1,"Economy","guest","field work, excursion",710,142
+663,"HumanGeography",2018,1,"Economy","guest","field work, excursion",654,130
+664,"HumanGeography",2018,1,"Economy","guest","field work, excursion",1655,302
+665,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",12710,2882
+666,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",3904,773
+667,"HumanGeography",2018,1,"Economy","employee with PhD","conference, workshop",916,204
+668,"HumanGeography",2018,1,"Economy","employee with PhD","conference, workshop",1144,201
+669,"HumanGeography",2018,2,"Economy","professor","field work, excursion",16306,3694
+670,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",16306,3694
+671,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",2572,480
+672,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",16608,3616
+673,"HumanGeography",2018,2,"Economy","employee with PhD","field work, excursion",12786,2711
+674,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",13984,3265
+675,"HumanGeography",2018,2,"Economy","professor","conference, workshop",1066,251
+676,"HumanGeography",2018,2,"Economy","employee with PhD","project meeting",1842,614
+677,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",16306,3694
+678,"HumanGeography",2018,1,"Economy","PhD candidate","conference, workshop",747,173
+679,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",1842,614
+680,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",18930,4650
+681,"HumanGeography",2018,2,"Economy","employee with PhD","conference, workshop",1066,251
+682,"HumanGeography",2018,2,"Economy","employee with PhD","field work, excursion",16410,3654
+683,"HumanGeography",2018,2,"Economy","guest","conference, workshop",10888,2305
+684,"HumanGeography",2018,2,"Economy","guest","project meeting",1678,392
+685,"HumanGeography",2018,2,"Economy","professor","field work, excursion",16306,3694
+686,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1308,259
+687,"HumanGeography",2018,2,"Economy","guest","conference, workshop",16306,3694
+688,"HumanGeography",2018,2,"Economy","guest","field work, excursion",20794,4752
+689,"HumanGeography",2018,2,"Economy","guest","field work, excursion",10830,2394
+690,"HumanGeography",2018,2,"Economy","employee without PhD","conference, workshop",1308,259
+691,"HumanGeography",2018,1,"Economy","PhD candidate","conference, workshop",965,228
+692,"HumanGeography",2018,2,"Economy","PhD candidate","conference, workshop",1010,254
+693,"HumanGeography",2018,2,"Economy","PhD candidate","conference, workshop",1066,251
+694,"HumanGeography",2018,2,"Economy","employee with PhD","field work, excursion",2878,662
+695,"HumanGeography",2018,2,"Economy","employee with PhD","field work, excursion",13072,2910
+696,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1670,331
+697,"HumanGeography",2018,1,"Economy","guest","field work, excursion",1001,219
+698,"HumanGeography",2018,1,"Economy","guest","field work, excursion",1001,219
+699,"HumanGeography",2018,2,"Economy","guest","field work, excursion",1308,259
+700,"HumanGeography",2018,1,"Economy","guest","conference, workshop",1304,342
+701,"HumanGeography",2018,1,"Economy","guest","conference, workshop",1222,286
+702,"HumanGeography",2018,2,"Economy","PhD candidate","field work, excursion",15324,3164
+703,"HumanGeography",2018,2,"Economy","PhD candidate","conference, workshop",2022,422
+704,"HumanGeography",2018,1,"Economy","PhD candidate","field work, excursion",1222,286
+705,"HumanGeography",2018,2,"Economy","PhD candidate","conference, workshop",732,162
+706,"HumanGeography",2018,1,"Economy","PhD candidate","field work, excursion",7110,1641
+707,"HumanGeography",2018,1,"Economy","PhD candidate","field work, excursion",7794,1872
+708,"HumanGeography",2018,1,"Economy","guest","conference, workshop",533,126
+709,"HumanGeography",2018,1,"Economy","guest","conference, workshop",525,129
+710,"HumanGeography",2018,2,"Economy","guest","conference, workshop",1304,288
+711,"HumanGeography",2018,2,"Economy","guest","conference, workshop",2560,450
+712,"HumanGeography",2018,2,"Economy","guest","conference, workshop",12710,2882
+713,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",1670,331
+714,"GIScience",2018,1,"Economy","PhD candidate","conference, workshop",6828,1552
+715,"GIScience",2018,1,"Economy","PhD candidate","conference, workshop",8832,1798
+716,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",2022,422
+717,"GIScience",2018,2,"Business","guest","teaching",19786,5634
+718,"GIScience",2018,2,"Economy","guest","teaching",2572,480
+719,"GIScience",2018,2,"Economy","guest","teaching",2108,440
+720,"GIScience",2018,2,"Economy","guest","teaching",1670,331
+721,"GIScience",2018,2,"Economy","guest","teaching",2108,440
+722,"GIScience",2018,2,"Economy","guest","teaching",1716,402
+723,"GIScience",2018,2,"Economy","professor","other",2022,422
+724,"GIScience",2018,2,"Economy","professor","other",1670,331
+725,"GIScience",2018,2,"Economy","professor","conference, workshop",13438,2650
+726,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",22438,4642
+727,"GIScience",2018,2,"Economy","PhD candidate","other",17580,3573
+728,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",33564,8754
+729,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",3514,773
+730,"GIScience",2018,2,"Economy","employee with PhD","conference, workshop",1464,272
+731,"GIScience",2018,2,"Economy","employee with PhD","conference, workshop",1308,259
+732,"GIScience",2018,1,"Economy","PhD candidate","field work, excursion",2062,447
+733,"GIScience",2018,1,"Economy","PhD candidate",,1537,323
+734,"GIScience",2018,1,"Economy","guest","conference, workshop",652,144
+735,"GIScience",2018,1,"Economy","guest",,654,130
+736,"GIScience",2018,2,"Economy","employee with PhD","conference, workshop",13438,2650
+737,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",13438,2650
+738,"GIScience",2018,2,"Economy","PhD candidate","conference, workshop",13438,2650
+739,"RemoteSensing",2018,2,"Economy","guest","teaching",1420,283
+740,"RemoteSensing",2018,2,"Economy","guest","other",1340,288
+741,"RemoteSensing",2018,2,"Economy","guest","teaching",1050,258
+742,"RemoteSensing",2018,2,"Economy","guest","teaching",2108,440
+743,"RemoteSensing",2018,2,"Economy","PhD candidate","examination",19158,5494
+744,"RemoteSensing",2018,2,"Economy","professor","project meeting",622,93
+745,"RemoteSensing",2018,2,"Economy","guest","teaching",1050,258
+746,"RemoteSensing",2018,2,"Economy","PhD candidate","conference, workshop",16638,3986
+747,"RemoteSensing",2018,2,"Economy","PhD candidate","conference, workshop",18004,4344
+748,"RemoteSensing",2018,2,"Economy","PhD candidate","conference, workshop",13438,2650
+749,"RemoteSensing",2018,2,"Economy","professor","teaching",1142,265
+750,"RemoteSensing",2018,2,"Economy","professor","project meeting",1484,285
+751,"RemoteSensing",2018,2,"Economy","guest","teaching",2108,440
+752,"RemoteSensing",2018,2,"Economy","guest","teaching",2444,573
+753,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",1670,331
+754,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",14768,2934
+755,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",1142,265
+756,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",1420,283
+757,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",1670,331
+758,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",2108,440
+759,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",12112,3253
+760,"RemoteSensing",2018,2,"Economy","guest","conference, workshop",2108,440
+761,"RemoteSensing",2018,2,"Economy","guest","teaching",1670,331
+762,"RemoteSensing",2018,1,"Economy","guest","other",607,205
+763,"RemoteSensing",2018,2,"Economy","PhD candidate","teaching",3944,1085
+764,"RemoteSensing",2018,2,"Economy","professor","field work, excursion",16066,4001
+765,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1484,285
+766,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1142,265
+767,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1484,285
+768,"RemoteSensing",2018,2,"Economy","PhD candidate","teaching",2572,484
+769,"RemoteSensing",2018,2,"Economy","PhD candidate","project meeting",1304,288
+770,"RemoteSensing",2018,1,"Economy","PhD candidate","conference, workshop",1193,224
+771,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1304,288
+772,"RemoteSensing",2018,2,"Economy","professor","field work, excursion",16066,4001
+773,"RemoteSensing",2018,2,"Economy","PhD candidate","conference, workshop",1484,285
+774,"RemoteSensing",2018,1,"Economy","employee with PhD","conference, workshop",9579,2747
+775,"RemoteSensing",2018,1,"Economy","employee with PhD","conference, workshop",10028,2406
+776,"RemoteSensing",2018,1,"Economy","employee with PhD","conference, workshop",8258,2072
+777,"RemoteSensing",2018,1,"Economy","employee with PhD","conference, workshop",2731,505
+778,"RemoteSensing",2018,2,"Economy","employee with PhD","conference, workshop",3540,683
+779,"RemoteSensing",2018,2,"Economy","PhD candidate","other",886,194
+780,"RemoteSensing",2018,2,"Economy","employee with PhD","conference, workshop",16608,4172
+781,"RemoteSensing",2018,1,"Economy","professor","project meeting",710,142
+782,"RemoteSensing",2018,1,"Economy","professor","project meeting",607,205
+783,"RemoteSensing",2018,1,"Economy","professor","project meeting",922,176
+784,"RemoteSensing",2018,2,"Economy","professor","project meeting",1304,288
+785,"RemoteSensing",2018,2,"Economy","professor","project meeting",1304,288
+786,"RemoteSensing",2018,2,"Economy","professor","conference, workshop",2386,448
+787,"RemoteSensing",2018,2,"Economy","PhD candidate","conference, workshop",1938,517
+788,"RemoteSensing",2018,2,"Economy","professor","project meeting",1304,288
+789,"RemoteSensing",2018,2,"Economy","professor","conference, workshop",1010,254
+790,"RemoteSensing",2018,1,"Economy","employee with PhD","conference, workshop",20340,5214
+791,"RemoteSensing",2018,2,"Economy","professor","other",1304,288
+792,"RemoteSensing",2018,2,"Economy","professor","conference, workshop",22928,5736
+793,"RemoteSensing",2018,2,"Economy","professor","conference, workshop",2386,448
+794,"RemoteSensing",2018,2,"Economy","professor","conference, workshop",25788,6984
+795,"RemoteSensing",2018,2,"Economy","professor","conference, workshop",1938,517
+796,"RemoteSensing",2018,2,"Economy","employee with PhD","conference, workshop",20056,4813
+797,"RemoteSensing",2018,2,"Economy","employee with PhD","conference, workshop",1308,259
+798,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1484,285
+799,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",3656,949
+800,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1304,288
+801,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1484,285
+802,"RemoteSensing",2018,2,"Economy","employee with PhD","project meeting",1484,285
+803,"Support&Mangement",2018,0,,,,0,0
+804,"Support&Mangement",2020,0,,,,0,0
+805,"RemoteSensing",2020,2,"Economy","guest","other",2572,519
+806,"RemoteSensing",2020,2,"Economy","employee with PhD","project meeting",1864,437
+807,"RemoteSensing",2020,2,"Economy","employee with PhD","conference, workshop",18842,5705
+808,"RemoteSensing",2020,2,"Economy","employee with PhD","project meeting",1484,299
+809,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",18268,4932
+810,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",20974,5914
+811,"RemoteSensing",2020,2,"Economy","PhD candidate","project meeting",1428,348
+812,"RemoteSensing",2020,2,"Economy","employee with PhD","project meeting",1428,348
+813,"RemoteSensing",2020,1,"Economy","PhD candidate","conference, workshop",905,177
+814,"RemoteSensing",2020,2,"Economy","employee with PhD","project meeting",20558,5546
+815,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",2114,521
+816,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",19158,5769
+817,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",17208,4580
+818,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",4052,1033
+819,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",19720,5573
+820,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",2022,444
+821,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",1670,348
+822,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",9967,2146
+823,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",9914,2177
+824,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",9431,2564
+825,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",9944,2711
+826,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",9998,2511
+827,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",10070,3000
+828,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",16924,5302
+829,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",25748,7370
+830,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",5730,1412
+831,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",12802,3119
+832,"RemoteSensing",2020,1,"Economy","guest","conference, workshop",195,34
+833,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",13438,2782
+834,"RemoteSensing",2020,2,"Economy","guest","conference, workshop",16920,4350
+835,"GIScience",2020,1,"Economy","guest","teaching",654,136
+836,"GIScience",2020,1,"Economy","guest","teaching",533,132
+837,"GIScience",2020,2,"Economy","employee with PhD","project meeting",2002,460
+838,"GIScience",2020,1,"Economy","employee with PhD","conference, workshop",443,102
+839,"GIScience",2020,1,"Economy","employee with PhD","project meeting",820,201
+840,"HumanGeography",2020,2,"Economy","professor","field work, excursion",16306,3879
+841,"HumanGeography",2020,2,"Economy","employee without PhD","field work, excursion",18724,4454
+842,"HumanGeography",2020,2,"Economy","guest","teaching",1616,457
+843,"HumanGeography",2020,2,"Economy","professor","conference, workshop",2022,444
+844,"HumanGeography",2020,2,"Economy","guest","teaching",2572,519
+845,"HumanGeography",2020,2,"Economy","professor","conference, workshop",12710,3026
+846,"PhysicalGeography",2020,2,"Economy","PhD candidate","conference, workshop",12084,3179
+847,"PhysicalGeography",2020,1,"Economy","guest","conference, workshop",9421,2853
+848,"PhysicalGeography",2020,1,"Economy","guest","conference, workshop",9483,2308
+849,"PhysicalGeography",2020,2,"Economy","employee without PhD","field work, excursion",18930,4882
+850,"PhysicalGeography",2020,2,"Economy","employee without PhD","field work, excursion",18930,4882
+851,"PhysicalGeography",2020,1,"Economy","guest","field work, excursion",388,82
+852,"PhysicalGeography",2020,2,"Economy","employee with PhD","field work, excursion",21710,5272
+853,"PhysicalGeography",2020,2,"Economy","guest","project meeting",3758,862
+854,"PhysicalGeography",2020,2,"Economy","professor","field work, excursion",3540,717
+855,"PhysicalGeography",2020,2,"Economy","employee with PhD","field work, excursion",3540,717

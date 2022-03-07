@@ -1,0 +1,61 @@
+---
+title: "GEO885"
+author: "Gregory Biland"
+date: "3/7/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+Sys.setenv(LANG = "en")
+
+
+library(rworldmap)
+library(rworldxtra)
+library(rjson)
+library(devtools)
+library(tidyverse)
+library(gutenbergr)
+library(DT)
+library(flextable)
+library(geonames)
+library(dplyr)
+library(geoparser)
+library(here)
+library(tidytext)
+library(tidyr)
+library(ggplot2)
+library(ggmap)
+library(stringr)
+library(sf)
+library(mapview)
+library(tmap)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(spacyr)
+library(maptools)
+library(rgeos)
+library(entity)
+library(tidygeocoder)
+library(osmdata)
+library(magrittr)
+library(readtext)
+library(raster)
+library(spatstat)
+
+```
+
+```{r}
+amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/Project/Data and Code/GIUZ_AirTravel_20210509/AIRTRAVELS.csv")
+
+airports <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/Project/Data and Code/GIUZ_AirTravel_20210509/airports.csv")
+
+world_poly <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/TM_WORLD_BORDERS_SIMPL-0/TM_WORLD_BORDERS_SIMPL-0.3.shp")
+
+```
+
+```{r}
+airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords))
+
+```
+

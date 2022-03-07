@@ -1,0 +1,174 @@
+---
+title: 'GEO 881 - Data challenge 1: NYC Citibikes'
+author: "Gregory Biland"
+date: "03. März 2022"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+    fig_caption: yes
+  html_document:
+    code_folding: hide
+    fig_caption: yes
+    number_sections: no
+    toc: yes
+    toc_depth: 3
+    toc_float: no
+  word_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r Packages, echo = FALSE, warning = FALSE, message = FALSE}
+Sys.setenv(LANG = "en")
+options("digits.secs"=4)
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+
+knitr::opts_chunk$set(
+  message = F,
+  fig.width = 7,
+  fig.height = 6,
+  pandoc.stack.size = "4g",
+  fig.align = 'center',
+  opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+)
+
+library(ggplot2)
+library(tidygraph)
+library(tidyverse)
+library(sf)
+library(dplyr)
+library(tmap)
+```
+
+```{r Setup and Data, echo = FALSE, warning = FALSE, message = FALSE}
+tripdata <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO881 - Advanced Spatial Analysis II/DC1/201903-citibike-tripdata.csv")
+
+View(tripdata)
+```
+
+## Task 1
+
+```{r Task 1, echo=FALSE, message=FALSE, warning=FALSE}
+nrow(tripdata)
+```
+## Task 2
+
+```{r Task 2, echo = FALSE, warning = FALSE, message = FALSE}
+dates <- as.POSIXct(tripdata$starttime, format = "%Y-%m-%d %H:%M:%OS")
+time <- format(dates, format = "%H:%M:%OS")
+min_time <- table(time)
+min_time = as.data.frame(min_time,  optional = TRUE,
+              make.names = TRUE,
+              stringsAsFactors = FALSE)
+
+min(min_time$time)
+```
+## Task 3
+
+```{r Task 3, echo = FALSE, warning = FALSE, message = FALSE}
+tripdata <- tripdata %>%
+   filter(start.station.id != "NULL" & end.station.id != "NULL" )
+station_count_end <- unique(tripdata$end.station.id)
+length(station_count_end)
+```
+## Task 4
+
+```{r Task 4, echo = FALSE, warning = FALSE, message = FALSE}
+tripdata$TIMESTAMP.start <- as.Date(tripdata$starttime) %>% format(as.POSIXct(tripdata$starttime, format= "%Y-%m-%d %H:%M:%OS"), format= "%Y-%m-%d")
+
+days_count <- tripdata %>% group_by(TIMESTAMP.start) %>% count()
+
+nrow(tripdata)/nrow(days_count) 
+```
+The result to the question "What is the mean number of trips per day?" is smaller than in the solutions, due to the fact that the NULL values have already been removed for "start.station.id" and "end.station.id".
+## Task 5
+
+```{r Task 5, echo = FALSE, warning = FALSE, message = FALSE}
+#tripdata$TIMESTAMP.start <-  as.POSIXct(tripdata$starttime)
+date_unique <- tripdata %>% group_by(TIMESTAMP.start) %>% count()
+date_unique$weekday <- weekdays(as.Date(date_unique$TIMESTAMP.start))
+
+mean(date_unique$n[date_unique$weekday == "Sonntag"]) 
+```
+## Task 6
+
+```{r Task 6, echo = FALSE, warning = FALSE, message = FALSE}
+days_count$TIMESTAMP.start[which.max(days_count$n)]
+```
+## Task 7
+
+```{r Task 7, echo = FALSE, warning = FALSE, message = FALSE}
+max_day <- as.data.frame(dates)
+max_day <- max_day %>% 
+  filter(dates >= as.POSIXct("2019-03-30 11:00:00:000")) %>% filter(dates <= as.POSIXct("2019-03-30 15:00:00:000"))
+
+nrow(max_day)
+```
+## Task 8
+
+```{r Task 8, echo = FALSE, warning = FALSE, message = FALSE}
+max(tripdata$tripduration)/86400 #86400 equals the amount of seconds per day
+```
+The values should be preferably ruled out of the analysis, as they are likely to falsify the results due to measurement inaccuracies and may considerably reduce the significance of the data in certain cases.
+
+## Task 9
+```{r Task 9, echo = FALSE, warning = FALSE, message = FALSE}
+(quantile(tripdata$tripduration, probs = c(0.99)))/60 #Result gets divided by 60 because the original result is in seconds
+```
+## Task 10
+
+```{r Task 10, echo = FALSE, warning = FALSE, message = FALSE}
+#45 minutes is 2700 seconds to filter by
+threshold <- 2700
+short_trips <- tripdata %>%
+  filter(tripduration < threshold)
+short_trips <- short_trips %>%
+  mutate(tripduration = tripduration/60)
+
+ggplot(short_trips, aes(x=tripduration)) +
+  geom_histogram(binwidth = 1)+
+  labs(title="Trip durations in March",x="Trip durations in minutes", y = "Number of trips")
+```
+## Task 11
+
+```{r Task 11, echo = FALSE, warning = FALSE, message = FALSE}
+tripdata <- tripdata %>% rowwise() %>% 
+    mutate(distance = geosphere::distHaversine(c(start.station.longitude, start.station.latitude),
+                                  c(end.station.longitude, end.station.latitude)))
+
+median(tripdata$distance)
+```
+The method used in the beeline calculation is the haversine distance. This method assumes a spherical earth, ignoring ellipsoidal effects and was chosen due to its small margin of error, when calculating distances. The margin of error is 1.256m.
+
+## Task 12
+
+```{r Task 12, echo = FALSE, warning = FALSE, message = FALSE}
+sample_data <- tripdata[sample(nrow(tripdata), (nrow(tripdata)/10)), ]
+
+ggplot(data=sample_data, aes(x=distance, y=tripduration))+
+  geom_point(alpha = .5, cex = 1, size = 0.5)+
+  ggtitle("Trip duration by distance covered")+
+  xlab("Distance [m]")+
+  ylab("Trip duration [s]")
+```
+
+## Task 13
+
+```{r Task 13, echo = FALSE, warning = FALSE, message = FALSE}
+station_activity <- tripdata %>% count(start.station.id)
+station_activity <- station_activity %>% filter(n > 6100 | n < 100)
+
+station_activity <- left_join(station_activity, tripdata, by = "start.station.id") %>% select(-c(tripduration, starttime, stoptime, start.station.name, end.station.id, end.station.name, bikeid, usertype, birth.year, gender, TIMESTAMP.start, end.station.latitude, end.station.longitude)) #This step is not necessary but makes any further use of the data easier as it is tidy
+
+station_activity <- station_activity %>% st_as_sf(coords = c("start.station.longitude", "start.station.latitude"), crs = 4326) %>% rename(Startpoint = geometry)
+station_activity <- station_activity %>% distinct(start.station.id, .keep_all= TRUE)
+
+tmap_mode("view")
+tm_shape(station_activity) +
+  tm_symbols(size = "n", col = "red", scale = 1)+ 
+  tm_layout(title = "10 most and least active starting stations")
+```
+Plotting the ten most and least active stations in the same style is not a good idea and should be avoided, in further approaches, enabling to distinguish the least and most active stations. The most and least active stations should be distinguished by color or shape and not only by size with the same color.

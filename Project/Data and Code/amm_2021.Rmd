@@ -1,0 +1,1209 @@
+---
+title: "Air Miles Monitoring 2020"
+subtitle: 'For internal use only'
+author: "Peter Ranacher"
+date: "1 November 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+## Introduction
+
+This document reports on the business air travels at GIUZ in 2020. 
+
+## Packages 
+
+```{r load packages}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(viridis)
+library(wesanderson)
+library(grid)
+library(gridExtra)
+library(stringr)
+library(rstan)
+library(slider)
+```
+
+## Data 
+```{r read data}
+air_travel <- read.csv(
+  file="../data/GIUZ_AirTravel_20210509/AIRTRAVELS.csv",
+  header = T, sep = ",", stringsAsFactors = F)
+
+staff <- read.csv(
+  file="../data/GIUZ_AirTravel_20210509/DIVISION_STAFF_COUNT.csv",
+  header = T, sep = ",", stringsAsFactors = F)
+
+iata_codes <- read.csv(
+  file = "../data/GIUZ_AirTravel_20210509/airports.csv",
+  header = T, sep = ",", stringsAsFactors = F, na.strings = "", 
+  encoding = "UTF-8")
+
+```
+
+## Preprocessing
+```{r preprocessing}
+
+# Use lower case variable names. We don't shout.
+air_travel <- air_travel %>% 
+  rename_all(tolower)
+
+staff <- staff %>%
+  rename_all(tolower) %>%
+  mutate(division = if_else(division=="Support&Mangement",
+                            "Support&Management", division))
+
+# Replace all "" with NA
+air_travel <- na_if(air_travel, "")
+
+# Shorten information on passenger type
+air_travel <- air_travel %>% 
+  mutate(giuz_function = recode(
+    passenger_type, 
+    "Doktorierende" = "PhD candidate",
+    "ProfessorIn" = "professor",
+    "Nicht an der UZH angestellte Person (z.B. Gast, externe Doktorierende)" = "guest",
+    "Sonstige am Institut beschäftigte Person mit Doktortitel" = "employee with PhD",
+    "Sonstige am Institut beschäftigte Person ohne Doktortitel (ohne Doktorierende)" =
+      "employee with PhD",
+    "unbekannt" = "unknown", .missing = "unknown"))
+
+# Shorten information on travel reason 
+air_travel <- air_travel %>% 
+  mutate(reason = recode(
+    travel_reason_1, 
+    "Feldarbeit/Exkursion" = "fieldwork, excursion",
+    "feldarbeit/Exkursion" = "fieldwork, excursion",
+    "Konferenz" = "conference, workshop",
+    "konferenz" = "conference, workshop",
+    "Lehrveranstaltungen (z.B. Summer School, Kolloquium, Einzelvortrag)" = "teaching",
+    "Projektaquisition/Fundraising" = "project meeting",
+    "Projektmeeting" = "project meeting",
+    "Prüfungsabnahme" = "examination",
+    "Unbekannt" = "other",
+    "Weiteres" = "other",
+    "Workshop" = "conference, workshop", .missing = "other"))
+
+# Recode information on journey type
+air_travel <- air_travel %>% 
+  mutate(n_itinerary = recode(
+    journey_type,
+    "One-way" = 1,
+    "one-way" = 1,
+    "One-Way" = 1,
+    "One-Way " = 1,
+    "hin- und Rückflug" = 2,
+    "Hin- und Rückflug" = 2))
+
+# Some of the stopover information is wrong 
+# (arrival_airport is missing and instead contained in stopover_1)
+air_travel <- air_travel %>% 
+  mutate(stopover_needs_fixing = case_when(
+    !is.na(arrival_airport) ~ F,
+    is.na(arrival_airport) & is.na(stopover_1) ~ F,
+    is.na(arrival_airport) & !is.na(stopover_1) ~ T)) %>%
+  mutate (arrival_airport = ifelse(
+    stopover_needs_fixing, stopover_1, arrival_airport)) %>%
+  mutate(stopover_1 = ifelse(
+    stopover_needs_fixing, NA, stopover_1)) %>%
+  select(-stopover_needs_fixing)
+  
+      
+# Record number of stopovers 
+air_travel <- air_travel %>% 
+  mutate(n_stopovers = case_when(
+    is.na(stopover_1) ~  0,
+    !is.na(stopover_1) & is.na(stopover_2) ~ 1,
+    !is.na(stopover_1) & !is.na(stopover_2) ~ 2))
+  
+
+# Select relevant columns and rows (distance > 0)
+air_travel <- air_travel %>% 
+  select(at_id, division, year, distance_km, departure_airport, arrival_airport,
+        n_itinerary, flight_class, reason, giuz_function,
+        emissions_kgco2eq, n_stopovers) %>% 
+  rename(distance = distance_km) %>%
+  filter(distance > 0 & !is.na(distance))
+
+# Some of the IATA codes contain white spaces
+# The IATA code for Basel airport is BSL, not EAP
+# The IATA code for Aasiaat Airport is JEG, not AASIAAT
+# ROM is the all airport code for Rome,use FCO
+# LON is a the all airport code for London, use LHR instead
+# NYC is a the all airport code for New York, use JFK instead
+# BJS is the all airport code for Beijing, use PEK instead
+# MOW is the all airport code for Moscow, use SVO instead
+# YMQ is the all airport code for Montreal, use YUL instead
+# ZYR is the IATA code of Brussels Gare du Midi, use BRU instead
+# TSE was changed to NQZ in 2020
+# Change ZHR to ZRH
+
+air_travel <- air_travel %>% 
+  mutate(departure_airport = str_replace_all(departure_airport, 
+                                             pattern = " ", repl = "")) %>%
+   mutate(arrival_airport = str_replace_all(arrival_airport, 
+                                            pattern = " ", repl = "")) %>%
+  mutate(departure_airport = case_when(
+    departure_airport == "EAP" ~ "BSL",
+    departure_airport == "ROM" ~ "FCO",
+    departure_airport == "LON" ~ "LHR",
+    departure_airport == "BJS" ~ "PEK",
+    departure_airport == "MOW" ~ "SVO",
+    departure_airport == "ZYR" ~ "BRU",
+    departure_airport == "TSE" ~ "NQZ",
+    departure_airport == "ZHR" ~ "ZRH",
+    departure_airport == "NYC" ~ "JFK",
+    departure_airport == "YMQ" ~ "YUL",
+    departure_airport == "AASIAAT" ~ "JEG",
+    TRUE ~ departure_airport)) %>%
+  mutate(arrival_airport = case_when(
+    arrival_airport == "EAP" ~ "BSL",
+    arrival_airport == "ROM" ~ "FCO",
+    arrival_airport == "LON" ~ "LHR",
+    arrival_airport == "BJS" ~ "PEK",
+    arrival_airport == "MOW" ~ "SVO",
+    arrival_airport == "ZYR" ~ "BRU",
+    arrival_airport == "TSE" ~ "NQZ",
+    arrival_airport == "ZHR" ~ "ZRH",
+    arrival_airport == "NYC" ~ "JFK",
+    arrival_airport == "YMQ" ~ "YUL",
+    arrival_airport == "AASIAAT" ~ "JEG",
+    TRUE ~ arrival_airport))
+
+iata_codes <- iata_codes %>% 
+  select(iata_code, latitude_deg, longitude_deg, iso_country, 
+         continent, municipality) %>%
+  rename(lat = latitude_deg, lon = longitude_deg)
+
+# Join departure airports with IATA data 
+air_travel <- air_travel %>% 
+  left_join(iata_codes, by = c("departure_airport" = "iata_code")) %>%
+  rename(departure_lat = lat, departure_lon = lon, 
+         departure_iso_country = iso_country, departure_continent = continent, 
+         departure_municipality = municipality)
+
+# Join arrival airports with IATA data 
+air_travel <- air_travel %>% 
+  left_join(iata_codes, by = c("arrival_airport" = "iata_code")) %>%
+  rename(arrival_lat = lat, arrival_lon = lon, 
+         arrival_iso_country = iso_country, arrival_continent = continent, 
+         arrival_municipality = municipality)
+```
+
+```{r summary statistics}
+
+# Results are different 
+# More air travels than in the last analysis
+# Reason: upper and lowercase entries in travel reasons, 
+# initially, the successive join lost some rows
+
+# Aggregate air travel for Giuz
+aggregated_giuz <- air_travel %>% 
+  group_by(year) %>% 
+  summarise(total_distance = sum(distance),
+            total_emission = sum(emissions_kgco2eq),
+            total_travels_oneway = sum(n_itinerary)) %>%
+  mutate(total_distance_3y_mean = slide_dbl(total_distance, mean, 
+                                            .before = 1, .after = 1,
+                                            .complete = T)) %>%
+  mutate(total_emission_3y_mean = slide_dbl(total_emission, mean, 
+                                            .before = 1, .after = 1,
+                                            .complete = T)) 
+
+
+
+# Join head count data and compute per capita distance
+aggregated_giuz <- staff %>% 
+  group_by(year) %>%
+  summarise(head_count = sum(head_count)) %>% 
+  inner_join(aggregated_giuz, by = "year") %>%
+  mutate(distance_per_capita = total_distance/head_count) %>% 
+  mutate(distance_per_capita_3y_mean = slide_dbl(distance_per_capita, mean, 
+                                                 .before = 1, .after = 1,
+                                                 .complete = T)) %>% 
+  mutate(emission_per_capita = total_emission/head_count) %>%
+  mutate(emission_per_capita_3y_mean = slide_dbl(emission_per_capita, mean,
+                                                 .before = 1, .after = 1,
+                                                 .complete = T))
+  
+  
+# Aggregate air travel per division
+aggregated_division <- air_travel %>% 
+  group_by(division, year) %>% 
+  summarise(total_distance = sum(distance),
+            total_emission = sum(emissions_kgco2eq),
+            total_travels_oneway = sum(n_itinerary))
+
+# Join head count data and compute per capita distance
+aggregated_division <- staff %>% 
+  group_by(year, division) %>%
+  summarise(head_count = sum(head_count)) %>% 
+  inner_join(aggregated_division, by = c("year", "division")) %>%
+  mutate(distance_per_capita = total_distance/head_count) 
+  
+# Aggregate air travel per reason and year
+aggregated_reason <- air_travel %>%
+  group_by(year, reason) %>%
+  summarise(total_distance = sum(distance))
+
+# Aggregate air travel per function at Giuz and year
+aggregated_giuz_function <- air_travel %>% 
+  group_by(year, giuz_function) %>%
+  summarise(total_distance = sum(distance)) 
+```
+
+```{r compute baselines distances}
+# Define periods
+full_period <- c(2017:2025)
+reference_period <- c(2017:2019)
+target_period <- c(2019, 2025)
+
+# Define baseline
+baseline_distance <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(mean = mean(total_distance, na.rm=TRUE)) %>%
+  pull(mean)
+
+baseline_distance_low <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(min = min(total_distance, na.rm=TRUE)) %>%
+  pull(min) 
+
+baseline_distance_high <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(max = max(total_distance, na.rm=TRUE)) %>%
+  pull(max) 
+
+# per capita 
+baseline_distance_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(mean = mean(distance_per_capita, na.rm=TRUE)) %>%
+  pull(mean) 
+
+baseline_distance_low_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(min = min(distance_per_capita, na.rm=TRUE)) %>%
+  pull(min) 
+
+baseline_distance_high_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(max = max(distance_per_capita, na.rm=TRUE)) %>%
+  pull(max) 
+
+
+# Define reference
+reference_distance <- data.frame(x=reference_period,
+                                 y=rep(baseline_distance, length(reference_period)))
+
+# per capita
+reference_distance_per_capita <- data.frame(x=reference_period,
+                                            y=rep(baseline_distance_per_capita,
+                                                  length(reference_period)))
+
+# Define target
+target_distance <- data.frame(x=target_period,
+                              y=c(baseline_distance, baseline_distance * 0.75)) 
+
+
+# per capita
+target_distance_per_capita <- data.frame(x=target_period,
+                                         y=c(baseline_distance_per_capita,
+                                             baseline_distance_per_capita * 0.75)) 
+
+# Maximum total distance per year
+max_distance <- max(aggregated_giuz$total_distance) 
+
+# per capita
+max_distance_per_capita <-max(aggregated_giuz$distance_per_capita) 
+
+```
+
+
+```{r compute baselines CO2}
+
+# Define baseline
+baseline_co2 <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
+  pull(mean)
+
+baseline_co2_low <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(min = min(total_emission, na.rm=TRUE)) %>%
+  pull(min) 
+
+baseline_co2_high <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(max = max(total_emission, na.rm=TRUE)) %>%
+  pull(max) 
+
+# UZH: only 2018 and 2019
+uzh_baseline_co2 <- aggregated_giuz %>%
+  filter(year %in% reference_period[-1]) %>%
+  summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
+  pull(mean)
+
+# per capita 
+baseline_co2_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(mean = mean(emission_per_capita, na.rm=TRUE)) %>%
+  pull(mean) 
+
+baseline_co2_low_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(min = min(emission_per_capita, na.rm=TRUE)) %>%
+  pull(min) 
+
+baseline_co2_high_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(max = max(emission_per_capita, na.rm=TRUE)) %>%
+  pull(max) 
+
+# UZH: only 2018 and 2019
+uzh_baseline_co2_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period[-1]) %>%
+  summarize(mean = mean(emission_per_capita, na.rm=TRUE)) %>%
+  pull(mean) 
+
+# Define reference
+reference_co2 <- data.frame(x=reference_period,
+                            y=rep(baseline_co2, length(reference_period)))
+
+uzh_reference_co2 <- data.frame(x=reference_period,
+                                y=rep(uzh_baseline_co2, length(reference_period)))
+
+# per capita
+reference_co2_per_capita <- data.frame(x=reference_period,
+                                       y=rep(baseline_co2_per_capita,
+                                       length(reference_period)))
+
+uzh_reference_co2_per_capita <- data.frame(x=reference_period[-1],
+                                y=rep(uzh_baseline_co2_per_capita,
+                                      length(reference_period[-1])))
+
+# Define target
+target_co2 <- data.frame(x=target_period,
+                         y=c(baseline_co2, baseline_co2 * 0.75)) 
+
+perc_2025 <- 0.6 - ((0.6 - 0.47) * (2030 - 2025) / (2030 -2022))
+
+uzh_target_co2 <- data.frame(x=target_period,
+                             y=c(uzh_baseline_co2 * 0.60, 
+                                 uzh_baseline_co2 * perc_2025)) 
+
+# per capita
+target_co2_per_capita <- data.frame(x=target_period,
+                                    y=c(baseline_co2_per_capita,
+                                    baseline_co2_per_capita * 0.75)) 
+
+uzh_target_co2_per_capita <- data.frame(x=target_period,
+                                        y=c(uzh_baseline_co2_per_capita * 0.60,
+                                            uzh_baseline_co2_per_capita * perc_2025)) 
+
+# Maximum total distance per year
+max_co2 <- max(aggregated_giuz$total_emission) 
+
+# per capita
+max_co2_per_capita <-max(aggregated_giuz$emission_per_capita) 
+
+```
+
+# Visualize of status quo 
+
+```{r giuz air travel distance}
+red <- wes_palette("Darjeeling1")[1]
+green <- wes_palette("Darjeeling1")[2]
+orange <- wes_palette("Darjeeling1")[3]
+
+t_col <- function(color, percent = 50, name = NULL) {
+
+  ## Get RGB values for named color
+  rgb.val <- col2rgb(color)
+  
+  ## Make new color using input color as base and alpha set by transparency
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+  
+  ## Save the color
+  invisible(t.col)
+}
+
+# Total air travel at Giuz
+total_distance_plot <- ggplot() + 
+  geom_line(data=reference_distance, 
+            aes(x, y, color="reference",
+                linetype="reference"),  
+            size=1) +
+  geom_hline(yintercept=baseline_distance_high, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_distance_low, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_distance, 
+            size=0.5, color="grey") +
+  geom_line(data=target_distance, 
+            aes(x, y, color="target", linetype="target"), 
+            size=1) + 
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=total_distance, color="observed",
+                linetype="observed"),
+            size=1) +
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=total_distance_3y_mean, 
+                color="3-year running mean", linetype = "3-year running mean"),
+            size=1) +
+  geom_point(data=aggregated_giuz, 
+              aes(x=year, y=total_distance),
+              color=orange, size=3) +
+  ylab("km") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0,max_distance*1.02)) +
+  ggtitle("GIUZ air travel (2017-2020): Flight distance")+
+  scale_colour_manual("", 
+                      breaks = c("reference", "target", "observed", 
+                                 "3-year running mean"),
+                      values = c("grey", green, orange, orange))+
+  scale_linetype_manual("", breaks = c("reference", "target", "observed",
+                                       "3-year running mean"),
+                        values = c(1,1,1,3)) +
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+# per capita
+distance_per_capita_plot <- ggplot() + 
+  geom_line(data=reference_distance_per_capita, 
+            aes(x, y, color="reference",linetype="reference"),  
+            size=1) +
+  geom_line(data=target_distance_per_capita, 
+            aes(x, y, color="target",linetype="target"), 
+            size=1) +
+  geom_hline(yintercept=baseline_distance_high_per_capita, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_distance_low_per_capita, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_distance_per_capita, 
+            size=0.5, color="grey") +
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=distance_per_capita, color="observed", linetype="observed"),
+            size=1) +
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=distance_per_capita_3y_mean, color="3-year running mean",
+                linetype = "3-year running mean"), size=1) +
+  geom_point(data=aggregated_giuz, 
+              aes(x=year, y=distance_per_capita),
+              color=orange, size=3) +
+  ylab("km per capita") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0, 
+                              max_distance_per_capita*1.02)) +  
+  scale_colour_manual("", breaks = c("reference", "target", "observed", 
+                                     "3-year running mean"),
+                      values = c("grey", green, orange, orange))+
+  scale_linetype_manual("", breaks = c("reference", "target", "observed", 
+                                     "3-year running mean"),
+                      values = c(1, 1, 1, 3))+
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+gA <- ggplotGrob(total_distance_plot)
+gB <- ggplotGrob(distance_per_capita_plot)
+g <- grid::grid.newpage()
+g <- rbind(gA, gB)
+
+ggsave(file="flight_distance.png", g,
+       width = 10,
+       height= 7)
+grid.draw(g)
+  
+```
+
+```{r giuz air travel co2}
+
+# Total air travel at Giuz
+total_co2_plot <- ggplot() + 
+  geom_line(data=reference_co2, 
+            aes(x, y, color="target GIUZ"), size=1) +
+  geom_line(data=uzh_reference_co2,  aes(x, y, color="target UZH"), size=1) +
+  geom_hline(yintercept=baseline_co2_high, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_co2_low, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_line(data=target_co2, 
+            aes(x, y, color="target GIUZ"), linetype="dashed", 
+            size=1) + 
+  geom_line(data=uzh_target_co2, 
+            aes(x, y, color="target UZH"), linetype="dashed",  
+            size=1) + 
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=total_emission, color="observed"),
+            size=1) +
+  geom_point(data=aggregated_giuz, 
+              aes(x=year, y=total_emission),
+              color=orange, size=3) +
+  ylab("kg CO2 eq.") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0,max_co2*1.02)) +
+  ggtitle("GIUZ air travel (2017-2020): emissions")+
+  scale_colour_manual("", 
+                      breaks = c("observed", "target GIUZ","target UZH"),
+                      values = c( orange, green, red))+
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+co2_per_capita_plot <- ggplot() + 
+  geom_line(data=reference_co2_per_capita, 
+            aes(x, y, color="target GIUZ"), size=1) +
+  geom_line(data=uzh_reference_co2_per_capita,  
+            aes(x, y, color="target UZH"), size=1) +
+  geom_hline(yintercept=baseline_co2_high_per_capita, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_co2_low_per_capita, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_line(data=target_co2_per_capita, 
+            aes(x, y, color="target GIUZ"), linetype="dashed", 
+            size=1) + 
+  geom_line(data=uzh_target_co2_per_capita, 
+            aes(x, y, color="target UZH"), linetype="dashed",  
+            size=1) + 
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=emission_per_capita, color="observed"),
+            size=1) +
+  geom_point(data=aggregated_giuz, 
+              aes(x=year, y=emission_per_capita),
+              color=orange, size=3) +
+  ylab("kg CO2 eq. per capita") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0,max_co2_per_capita*1.02)) +
+  ggtitle("GIUZ air travel (2017-2020): emissions")+
+  scale_colour_manual("", 
+                      breaks = c("observed", "target GIUZ","target UZH"),
+                      values = c( orange, green, red))+
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.25)) 
+
+
+ggsave(file="total_co2_plot.png", total_co2_plot,
+       width = 10,
+       height= 5)
+
+
+ggsave(file="co2_per_capita_plot.png", co2_per_capita_plot,
+       width = 10,
+       height= 5)
+
+gA <- ggplotGrob(total_co2_plot)
+gB <- ggplotGrob(co2_per_capita_plot)
+g <- grid::grid.newpage()
+g <- rbind(gA, gB)
+
+ggsave(file="flight_emission.png", g,
+       width = 10,
+       height= 7)
+
+grid.draw(g)
+  
+```
+
+
+## Travel reasons
+```{r travel reasons plot}
+blue <- wes_palette("Darjeeling1")[5]
+dark_orange <- wes_palette("Darjeeling1")[4]
+black <- wes_palette("Darjeeling2")[5]
+
+reasons_plot <- ggplot(aggregated_reason, 
+                       aes(fill=reason, y=total_distance, x=year)) + 
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_manual(values=c(blue, dark_orange, green, black, orange, red), 
+                      name = "Reason for travel") +
+    ggtitle("Reasons for air travel at GIUZ (2017-2020)") +
+    xlab("") +
+    ylab("km") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
+
+reasons_plot
+ggsave("reasons_plot.png", reasons_plot, width=7, height=5)
+```
+
+## Travel function 
+
+```{r travel function plot}
+
+giuz_function_plot <- ggplot(aggregated_giuz_function, aes(fill=giuz_function, 
+                                y=total_distance, x=year)) + 
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_manual(values=c(green, red, blue, orange, black),
+                      name="Function at GIUZ") +
+    ggtitle("Function of air travellers at GIUZ (2017-2020)") +
+    xlab("") +
+    ylab("km") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
+
+ggsave("giuz_function_plot.png", giuz_function_plot, width = 7, height=5)
+gA <- ggplotGrob(giuz_function_plot)
+gB <- ggplotGrob(reasons_plot)
+g <- grid.newpage()
+g <- cbind(gA, gB)
+
+giuz_function_plot
+# ggsave(file="reason_function_plot.png", g,
+#        width = 15,
+#        height= 5)
+
+```
+
+## Air travel by division
+```{r units}
+
+# Air travel by Giuz division
+division_plot <- ggplot() + 
+  geom_line(data=reference_distance_per_capita, aes(x, y),  
+            color="grey", size=3, alpha=0.4) +
+  geom_line(data=target_distance_per_capita, aes(x, y), 
+            color=green, size=3, alpha=0.4) + 
+  geom_line(data=aggregated_division, 
+              aes(x=year, y=distance_per_capita, color=division),
+              size=1) +
+  annotate("text", x = 2023, y = 6000, label="target", color=green)+
+  ylab("km per capita") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0, 
+                              max_distance_per_capita*1.6)) +
+  scale_color_manual(values=c(red, blue, black, orange),
+                     name="Division")+
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.75)) 
+
+ggsave("division_plot.png", division_plot, width = 10, height=7)
+
+division_plot
+```
+
+# Scenarios 
+```{r define scenarios}
+
+# Air travel with more than 10,000 km (per itinerary)
+ultra_long_distance_threshold <- 10000
+
+# Air travel to locations which can be reached by train from Zurich 
+# (within 1,000 km per itinerary and either departure or arrival airport is Zurich)
+train_threshold <- 1000
+
+air_travel_scenarios <- air_travel %>% 
+  mutate(distance_per_itinerary = distance/n_itinerary) %>%
+  # Is the flight an ultra-long flight?
+  mutate(ultra_long_distance = 
+           if_else(distance_per_itinerary >= ultra_long_distance_threshold, 1, 0)) %>%
+  # Is the destination reachable by train from Zurich
+  mutate(train_reachable = if_else(
+    (distance_per_itinerary <= train_threshold) & 
+      (departure_airport == "ZRH" | arrival_airport == "ZRH"), 1, 0)) %>%
+  # Does a Giuz employee traveler travel to a conference? 
+  mutate(giuz_employee_at_conference = if_else(
+    (giuz_function != "guest") & (reason == "conference, workshop"), 1, 0)) %>%
+  # Is this conference in Europe?
+  mutate(giuz_employee_at_european_conference = if_else(
+    giuz_employee_at_conference & departure_continent == "EU" & 
+      arrival_continent == "EU", 1, 0)) 
+
+```
+
+```{r no ultra-long flights}
+
+total_head_count <- staff %>%
+  filter (year %in% c(2017, 2018, 2019))%>%
+  summarise(head_count = sum(head_count)) %>%
+  pull(head_count)
+
+
+# Compute the mean and the standard error of ultra-long flights
+ultra_long_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & ultra_long_distance) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Compute the mean and the standard error of all other flights
+regular_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & !ultra_long_distance) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Normalize per capita
+ultra_long_flights_per_capita <- ultra_long_flights %>% 
+  mutate(mean_ultra_long=(mean_distance * n_itinerary)/total_head_count,
+         se_ultra_long=(se_distance * n_itinerary) / total_head_count,
+         n_ultra_long = n_itinerary) %>%
+  select(mean_ultra_long, se_ultra_long, n_ultra_long)
+
+regular_flights_per_capita <- regular_flights %>% 
+  mutate(mean_regular=(mean_distance * n_itinerary)/total_head_count,
+         se_regular = (se_distance * n_itinerary) / total_head_count,
+         n_regular = n_itinerary) %>%
+  select(mean_regular, se_regular, n_regular)
+
+
+# Propose scenarios
+no_ultras_scenario <- data.frame(percentage=seq(from = 0.0, to = 1, by = 0.1)) %>% 
+  left_join(regular_flights_per_capita, by=character()) %>%
+  left_join(ultra_long_flights_per_capita, by=character()) %>% 
+  mutate(distance_per_capita = mean_regular + mean_ultra_long * percentage,
+         se = (se_regular + se_ultra_long * percentage),
+         reduction = rev(percentage))
+
+label <- paste0("GIUZ reduction target")
+label_y <- target_distance_per_capita$y[2] - 500
+
+no_ultras_plot <- ggplot(no_ultras_scenario) +
+  geom_ribbon(aes(x = reduction, 
+                  y = distance_per_capita,
+                  ymin = distance_per_capita - se, 
+                  ymax = distance_per_capita + se), 
+              fill = t_col(orange, 80)) +
+  geom_line(aes(x=reduction, y=distance_per_capita), 
+            color = orange, size=1) + 
+  geom_hline(yintercept=target_distance_per_capita$y[2], 
+             size=1, color=green, linetype = "dashed") +
+  annotate("text", x = 0.15, y = label_y, label=label, color=green, size=6) + 
+  scale_y_continuous(label=comma,
+                     limits=c(0, max_distance_per_capita*1.02)) +
+  scale_x_continuous(expand = expand_scale(),
+                     limits = c(0,1.00),
+                     label=scales::percent) + 
+  xlab("avoid ultra-long flights (> 10,000 km)") + 
+  ylab("km per capita (projected)") + 
+  theme_bw() +
+  theme(text = element_text(size=20),
+        axis.text.x = element_text(hjust = 0.9),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+ggsave("no_ultra_long_flights.png", no_ultras_plot, width = 10, height=7)
+
+```
+
+
+```{r train travel to locations within 1000 km}
+
+# Compute the mean and the standard error of flights to train-reachable destinations
+train_reachable_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & train_reachable) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Compute the mean and the standard error of flights to non train-reachable destinations
+non_train_reachable_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & !train_reachable) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Normalize per capita
+train_reachable_flights_per_capita <- train_reachable_flights %>% 
+  mutate(mean_train_reachable=(mean_distance * n_itinerary)/total_head_count,
+         se_train_reachable=(se_distance * n_itinerary) / total_head_count,
+         n_train_reachable = n_itinerary) %>%
+  select(mean_train_reachable, se_train_reachable, n_train_reachable)
+
+non_train_reachable_flights_per_capita <- non_train_reachable_flights %>% 
+  mutate(mean_non_train_reachable=(mean_distance * n_itinerary)/total_head_count,
+         se_non_train_reachable=(se_distance * n_itinerary) / total_head_count,
+         n_non_train_reachable = n_itinerary) %>%
+  select(mean_non_train_reachable, se_non_train_reachable, n_non_train_reachable)
+
+# Propose scenarios
+all_trains_scenario <- data.frame(percentage=seq(from = 0.0, to = 1, by = 0.1)) %>% 
+  left_join(train_reachable_flights_per_capita, by=character()) %>%
+  left_join(non_train_reachable_flights_per_capita, by=character()) %>% 
+  mutate(distance_per_capita = 
+           mean_non_train_reachable + mean_train_reachable * percentage,
+         se = (se_non_train_reachable + se_train_reachable * percentage),
+         reduction = rev(percentage))
+
+all_trains_plot <- ggplot(all_trains_scenario) +
+  geom_ribbon(aes(x = reduction, 
+                  y = distance_per_capita,
+                  ymin = distance_per_capita - se, 
+                  ymax = distance_per_capita + se), 
+              fill = t_col(red, 80)) +
+  geom_line(aes(x=reduction, y=distance_per_capita), 
+            color = red, size=1) + 
+  geom_hline(yintercept=target_distance_per_capita$y[2], 
+             size=1, color=green, linetype = "dashed") +
+  annotate("text", x = 0.15, y = label_y, label=label, color=green, size=6) + 
+  scale_y_continuous(label=comma,
+                     limits=c(0, max_distance_per_capita*1.02)) +
+  scale_x_continuous(expand = expand_scale(),
+                     limits = c(0,1.00),
+                     label=scales::percent) + 
+  xlab("avoid flights to destinations that can be reached by train (< 1,000 km)") + 
+  ylab("km per capita (projected)") + 
+  theme_bw() +
+  theme(text = element_text(size=20),
+        axis.text.x = element_text(hjust = 0.9),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+ggsave("all_trains.png", all_trains_plot, width = 10, height=7)
+
+
+```
+
+```{r European conferences}
+# Compute the mean and the standard error of flights to conferences in Europe (for Giuz employees only)
+european_conference_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & giuz_employee_at_european_conference) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Compute the mean and the standard error of flights to conferences outside Europe (for Giuz employees only)
+non_european_conference_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & !giuz_employee_at_european_conference &
+         giuz_employee_at_conference) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+other_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & !giuz_employee_at_conference) %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Normalize per capita
+european_conference_flights_per_capita <- european_conference_flights %>% 
+  mutate(mean_european_conference=(mean_distance * n_itinerary)/total_head_count,
+         se_european_conference=(se_distance * n_itinerary) / total_head_count,
+         n_european_conference = n_itinerary) %>%
+  select(mean_european_conference, se_european_conference, n_european_conference)
+
+non_european_conference_flights_per_capita <- non_european_conference_flights %>% 
+  mutate(mean_non_european_conference=(mean_distance * n_itinerary)/total_head_count,
+         se_non_european_conference=(se_distance * n_itinerary) / total_head_count,
+         n_non_european_conference = n_itinerary) %>%
+  select(mean_non_european_conference, se_non_european_conference, 
+         n_non_european_conference)
+
+other_flights_per_capita <- other_flights %>% 
+  mutate(mean_other=(mean_distance * n_itinerary)/total_head_count,
+         se_other=(se_distance * n_itinerary) / total_head_count,
+         n_other = n_itinerary) %>%
+  select(mean_other, se_other, n_other)
+
+# Propose scenarios
+eu_conference_scenario <- data.frame(percentage=seq(from = 0.0, to = 1, by = 0.1)) %>% 
+  left_join(european_conference_flights_per_capita, by=character()) %>%
+  left_join(non_european_conference_flights_per_capita, by=character()) %>% 
+  left_join(other_flights_per_capita, by=character()) %>%
+  mutate(distance_per_capita = 
+           mean_other + mean_european_conference + 
+           mean_non_european_conference * percentage + 
+           mean_european_conference * (1-percentage),
+         se = (se_other + se_european_conference + 
+                 se_non_european_conference * percentage +
+                 se_european_conference * (1-percentage)),
+         reduction = rev(percentage))
+
+eu_conference_plot <- ggplot(eu_conference_scenario) +
+  geom_ribbon(aes(x = reduction, 
+                  y = distance_per_capita,
+                  ymin = distance_per_capita - se, 
+                  ymax = distance_per_capita + se), 
+              fill = t_col(blue, 80)) +
+  geom_line(aes(x=reduction, y=distance_per_capita), 
+            color = blue, size=1) + 
+  geom_hline(yintercept=target_distance_per_capita$y[2], 
+             size=1, color=green, linetype = "dashed") +
+  annotate("text", x = 0.15, y = label_y, label=label, color=green, size=6) + 
+  scale_y_continuous(label=comma,
+                     limits=c(0, max_distance_per_capita*1.02)) +
+  scale_x_continuous(expand = expand_scale(),
+                     limits = c(0,1.00),
+                     label=scales::percent) + 
+  xlab("visit European instead of non-European conferences") + 
+  ylab("km per capita (projected)") + 
+  theme_bw() +
+  theme(text = element_text(size=20),
+        axis.text.x = element_text(hjust = 0.9),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+ggsave("european_conferences.png", eu_conference_plot, width = 10, height=7)
+
+```
+
+```{r no more guests}
+# Compute the mean and the standard error of flights carried out by guests
+guest_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & giuz_function == "guest") %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Compute the mean and the standard error of flights carried out by giuz employees
+giuz_employee_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & giuz_function != "guest") %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+# Normalize per capita
+guest_flights_per_capita <- guest_flights %>% 
+  mutate(mean_guest=(mean_distance * n_itinerary)/total_head_count,
+         se_guest=(se_distance * n_itinerary) / total_head_count,
+         n_guest = n_itinerary) %>%
+  select(mean_guest, se_guest, n_guest)
+
+giuz_employee_flights_per_capita <- giuz_employee_flights %>% 
+  mutate(mean_giuz_employee=(mean_distance * n_itinerary)/total_head_count,
+         se_giuz_employee=(se_distance * n_itinerary) / total_head_count,
+         n_giuz_employee = n_itinerary) %>%
+  select(mean_giuz_employee, se_giuz_employee, n_giuz_employee)
+
+
+no_guests_scenario <- data.frame(percentage=seq(from = 0.0, to = 1, by = 0.1)) %>% 
+  left_join(guest_flights_per_capita, by=character()) %>%
+  left_join(giuz_employee_flights_per_capita, by=character()) %>% 
+  mutate(distance_per_capita = mean_giuz_employee + mean_guest * percentage,
+         se = (se_giuz_employee + se_guest *percentage),
+         reduction = rev(percentage))
+
+no_guests_plot <- ggplot(no_guests_scenario) +
+  geom_ribbon(aes(x = reduction, 
+                  y = distance_per_capita,
+                  ymin = distance_per_capita - se, 
+                  ymax = distance_per_capita + se), 
+              fill = t_col(dark_orange, 80)) +
+  geom_line(aes(x=reduction, y=distance_per_capita), 
+            color = dark_orange, size=1) + 
+  geom_hline(yintercept=target_distance_per_capita$y[2], 
+             size=1, color=green, linetype = "dashed") +
+  annotate("text", x = 0.15, y = label_y, label=label, color=green, size=6) + 
+  scale_y_continuous(label=comma,
+                     limits=c(0, max_distance_per_capita*1.02)) +
+  scale_x_continuous(expand = expand_scale(),
+                     limits = c(0,1.00),
+                     label=scales::percent) + 
+  xlab("reduce the number of guests arriving by plane") + 
+  ylab("km per capita (projected)") + 
+  theme_bw() +
+  theme(text = element_text(size=20),
+        axis.text.x = element_text(hjust = 0.9),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+ggsave("no_guests_plot.png", no_guests_plot, width = 10, height=7)
+
+
+
+
+```
+
+```{r be like GIScience}
+
+head_count_giscience <- staff %>%
+  filter (year %in% c(2017, 2018, 2019) & division=="GIScience")%>%
+  summarise(head_count = sum(head_count)) %>%
+  pull(head_count)
+
+head_count_support_and_management <- staff %>%
+  filter (year %in% c(2017, 2018, 2019) & division=="Support&Management")%>%
+  summarise(head_count = sum(head_count)) %>%
+  pull(head_count)
+
+head_count_other_divisions <- staff %>%
+  filter (year %in% c(2017, 2018, 2019) & division!="GIScience" &
+          division!="Support&Management") %>%
+  summarise(head_count = sum(head_count)) %>%
+  pull(head_count)
+
+# Compute the mean and the standard error of flights carried out by GIScience
+giscience_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & division == "GIScience") %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+support_and_management_flights <- air_travel_scenarios %>%
+  filter(year %in% c(2017, 2018, 2019) & division == "Support&Management") %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary)) 
+
+support_and_management_flights [is.na(support_and_management_flights )] <- 0
+  
+  
+# Compute the mean and the standard error of flights carried out by other divisions
+other_division_flights <- air_travel_scenarios %>% 
+  filter(year %in% c(2017, 2018, 2019) & division != "GIScience" & 
+           division != "Support&Management") %>%
+  uncount(n_itinerary) %>% 
+  summarise(mean_distance=mean(distance_per_itinerary), 
+            sd_distance=sd(distance_per_itinerary),
+            n_itinerary=n(),
+            se_distance=sd_distance / sqrt(n_itinerary))
+
+
+# Normalize per capita
+giscience_flights_per_capita <- giscience_flights %>% 
+  mutate(mean_giscience=(mean_distance * n_itinerary)/head_count_giscience,
+         se_giscience=(se_distance * n_itinerary) / head_count_giscience,
+         n_giscience = n_itinerary) %>%
+  select(mean_giscience, se_giscience, n_giscience)
+
+support_and_management_flights_per_capita <- support_and_management_flights %>% 
+  mutate(mean_support_and_management=(
+    mean_distance * n_itinerary)/head_count_support_and_management,
+         se_support_and_management=(
+           se_distance * n_itinerary) / head_count_support_and_management,
+         n_support_and_management = n_itinerary) %>%
+  select(mean_support_and_management, se_support_and_management, 
+         n_support_and_management)
+
+other_division_flights_per_capita <- other_division_flights %>% 
+  mutate(mean_other_divisions=(mean_distance * n_itinerary)/head_count_other_divisions,
+         se_other_divisions=(se_distance * n_itinerary) / head_count_other_divisions,
+         n_other_divisions = n_itinerary) %>%
+  select(mean_other_divisions, se_other_divisions, n_other_divisions)
+
+
+# Propose scenarios
+be_like_giscience_scenario <- 
+  data.frame(percentage=seq(from = 0.0, to = 1, by = 0.1)) %>% 
+  left_join(giscience_flights_per_capita, by=character()) %>%
+  left_join(support_and_management_flights_per_capita, by=character()) %>% 
+  left_join(other_division_flights_per_capita, by=character()) %>%
+  mutate(distance_per_capita = 
+           mean_giscience * head_count_giscience/total_head_count +
+           mean_support_and_management *
+           head_count_support_and_management/total_head_count + 
+           mean_other_divisions * 
+           head_count_other_divisions/total_head_count * percentage + 
+           mean_giscience * head_count_other_divisions/total_head_count * (1-percentage),
+         se = (se_giscience * head_count_giscience/total_head_count +
+                 se_support_and_management *
+                 head_count_support_and_management/total_head_count + 
+                 se_other_divisions * 
+                 head_count_other_divisions/total_head_count * percentage +
+                 se_giscience * 
+                 head_count_other_divisions/total_head_count * (1-percentage)),
+         reduction = rev(percentage))
+
+be_like_giscience_plot <- ggplot(be_like_giscience_scenario) +
+  geom_ribbon(aes(x = reduction, 
+                  y = distance_per_capita,
+                  ymin = distance_per_capita - se, 
+                  ymax = distance_per_capita + se), 
+              fill = t_col(black, 80)) +
+  geom_line(aes(x=reduction, y=distance_per_capita), 
+            color = black, size=1) + 
+  geom_hline(yintercept=target_distance_per_capita$y[2], 
+             size=1, color=green, linetype = "dashed") +
+  annotate("text", x = 0.15, y = label_y, label=label, color=green, size=6) + 
+  scale_y_continuous(label=comma,
+                     limits=c(0, max_distance_per_capita*1.02)) +
+  scale_x_continuous(expand = expand_scale(),
+                     limits = c(0,1.00),
+                     label=scales::percent) + 
+  xlab("try to be like GIScience") + 
+  ylab("km per capita (projected)") + 
+  theme_bw() +
+  theme(text = element_text(size=20),
+        axis.text.x = element_text(hjust = 0.9),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
+
+ggsave("be_like_giscience.png", be_like_giscience_plot, width = 10, height=7)
+
+```
+

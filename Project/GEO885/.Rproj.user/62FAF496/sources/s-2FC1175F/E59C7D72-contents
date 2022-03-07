@@ -1,0 +1,361 @@
+---
+  title: "Toponym patterns"
+author: "Gregory Biland"
+date: "12/20/2021"
+output: pdf_document
+---
+  ## Setup
+  
+
+knitr::opts_chunk$set(echo = FALSE)
+options(stringsAsFactors = F)         # no automatic data transformation
+options("scipen" = 100, "digits" = 4) # suppress math annotation
+
+options(geonamesUsername="me_toponymboy")
+
+names = LETTERS[1:26] ## Gives a sequence of the letters of the alphabet
+beta1 = rnorm(26, 5, 2) ## A vector of slopes (one for each letter)
+beta0 = 10 ## A common intercept
+
+
+## Gregory Biland
+Sys.setenv(LANG = "en")
+
+remotes::install_github("rlesur/klippy")
+options(stringsAsFactors = F)         # no automatic data transformation
+options("scipen" = 100, "digits" = 4) # suppress math annotation
+
+
+# Download package Geoparser V0.1.2
+
+require(devtools)
+#install_version("geoparser", version = "0.1.2", repos = "http://cran.us.r-project.org")
+
+# set options
+# activate packages
+spacy_initialize(model = "en_core_web_sm")
+
+# activate klippy for copy-to-clipboard button
+here("/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis")
+here::i_am("Toponym_patterns.R")
+
+cities5000 <- read.delim("~/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/cities5000.txt", header=FALSE, stringsAsFactors=TRUE)
+cities5000$V2 = tolower(cities5000$V2)
+cities5000 <- subset(cities5000, select = -c(V7,V8,V9,V10,V11,V12,V13,V14,V15,V16,V17,V18,V19)) %>% rename("lon" = V5, "lat" = V6)
+
+world_poly <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/TM_WORLD_BORDERS_SIMPL-0/TM_WORLD_BORDERS_SIMPL-0.3.shp")
+
+#https://cran.r-project.org/web/packages/gutenbergr/vignettes/intro.html
+
+## {text} ----------------------------------------------------------------------------------
+
+gutenberg_full_data <- left_join(gutenberg_works(language == "en"), gutenberg_metadata, by = "gutenberg_id")
+gutenberg_full_data <- left_join(gutenberg_full_data, gutenberg_subjects)
+gutenberg_full_data <- subset(gutenberg_full_data, select = -c(rights.x,has_text.x,language.y,gutenberg_bookshelf.x, gutenberg_bookshelf.y,
+                                                               rights.y, has_text.y,gutenberg_bookshelf.y, gutenberg_author_id.y, title.y, author.y))
+gutenberg_full_data <- gutenberg_full_data[-which(is.na(gutenberg_full_data$author.x)),]
+word = c("novel", "Novel", "NOVEL")
+novels <- gutenberg_full_data %>% filter(str_detect(title.x,word))
+
+### Author birthday with title
+authors <- gutenberg_authors
+authors <- authors %>% drop_na(birthdate)
+authors_books <- left_join(authors, gutenberg_metadata, by = "author")
+authors_books <- subset(authors_books, select = -c(wikipedia,aliases,gutenberg_author_id.x,gutenberg_bookshelf, rights,has_text,alias))
+
+
+# Filter 50 random books
+
+set.seed(78)
+novels_random <- sample_n(novels, 100)
+
+original_books <- gutenberg_download((novels_random), meta_fields = "title")
+original_books_1 <- gutenberg_download((novels_random_1), meta_fields = "title")
+
+original_books$text <- gsub("_", "", original_books$text)
+
+original_books <- original_books  %>%
+  group_by(title) %>%
+  mutate(line = row_number()) %>%
+  ungroup()
+
+original_books #All books used in the analysis
+
+original_books_tidy <- subset(original_books, select = -c(gutenberg_id, title, line))
+full_text <- apply(original_books_tidy, 2, paste0, collapse=" ")
+text <- read.delim2("/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/full_text.txt")
+
+tidy_books <- original_books %>%
+  unnest_tokens(word, text) 
+
+tidy_books <- as.data.frame(unclass(tidy_books),                     # Convert all columns to factor
+                            stringsAsFactors = FALSE)
+tidy_books <- subset(tidy_books, select = -c(gutenberg_id))
+tidy_books$row_num <- seq.int(nrow(tidy_books))
+
+
+## {tidy - nouns} ----------------------------------------------------------------------------------
+word_counts <- tidy_books %>%
+  anti_join(stop_words, by = "word") %>%
+  count(title, word, sort = TRUE) %>%
+  group_by(title) %>%
+  mutate(line = row_number()) %>%
+  ungroup()
+
+word_counts$word <- as.character(word_counts$word)
+
+NER <- spacy_parse(word_counts$word, tag = TRUE, pos = TRUE)
+NER_complete <- spacy_parse(word_counts$word, tag = TRUE, pos = TRUE)
+NER <- subset(NER, pos == "PROPN" & entity == "GPE_B" & pos == "NOUN")
+NER <- subset(NER, select = -c(sentence_id,token_id,lemma,tag) )%>% rename("word" = token)
+
+NER <- left_join(NER,word_counts, by = "word", copy = TRUE)
+NER
+
+NER_filtered <- NER %>% distinct(word, .keep_all= TRUE)
+
+NER_sort <- NER_complete %>% group_by(pos) %>% count()
+plot(NER_sort)
+
+
+# {text analysis} ----------------------------------------------------------------------------------
+
+get_sentiments("bing")
+
+sentiment_analysis <- tidy_books %>%
+  inner_join(get_sentiments("bing"), by = "word") %>% 
+  count(title, index = line %/% 80, sentiment) %>% 
+  spread(sentiment, n, fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+
+sentiment_analysis_summary <- sentiment_analysis %>%
+  group_by(title) %>%
+  mutate(mean_pos = mean(positive),
+         mean_neg = mean(negative),
+         mean_sen = mean(sentiment))
+sentiment_analysis_summary <- sentiment_analysis_summary %>% distinct(mean_neg,mean_pos,mean_sen, .keep_all= TRUE)
+
+ggplot(sentiment_analysis_summary, aes(index, sentiment, fill = title)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  facet_wrap(~title, ncol = 2, scales = "free_x")
+
+
+guessed <- guess.lang(
+  file.path(find.package("koRpus"),"full_text.txt"),
+  udhr.path="~/downloads/udhr_txt.zip")
+summary(guessed)
+
+# {geoparsing} ----------------------------------------------------------------------------------
+place_names_filtered <- left_join(NER_filtered,cities5000, by = c("word" = "V2"), copy = TRUE)
+place_names <- left_join(NER,cities5000, by = c("word" = "V2"), copy = TRUE)
+place_names_unfiltered <- left_join(NER_complete,cities5000, by = c("token" = "V2"), copy = TRUE)
+
+locations <- as_tibble(place_names) %>% drop_na(V3,lon,lat)
+locations_unfiltered <- as_tibble(place_names_unfiltered) %>% drop_na(V3,lon,lat)
+locations_filtered <- as_tibble(place_names_filtered) %>% drop_na(V3,lon,lat)
+
+locations <- filter(locations, entity != "PERSON_B") %>% rename("Location" = V3)  %>% drop_na(title)
+
+#add row number and tidy
+locations %<>% mutate(row = row_number()) 
+locations <- subset(locations, select = -c(V4,V1))
+
+locations <- locations %>% distinct(word, .keep_all= TRUE)
+locations_unfiltered_dist <- locations_unfiltered %>% distinct(token, .keep_all= TRUE)
+locations_unfiltered_count <- locations_unfiltered %>% group_by(entity) %>% count()
+
+### locations with author and birthdate as well as subject
+locations_w_author <- left_join(locations, authors_books, by = "title")
+locations_w_author <- subset(locations_w_author, select = -c(gutenberg_id, gutenberg_author_id.y))
+locations_sf <- locations_w_author %>% st_as_sf(coords = c("lat", "lon"), crs = 4326)
+locations_unfiltered_sf <- locations_unfiltered %>% st_as_sf(coords = c("lat", "lon"), crs = 4326)
+
+locations_complete <- left_join(locations_w_author, novels_random, by = c("title"="title.x"))
+locations_complete <- subset(locations_complete, select = -c(author.x, gutenberg_author_id.x,language.x))
+
+# {geocoding} ----------------------------------------------------------------------------------
+
+newmap <- getMap(resolution = "high")
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+worldmap <- st_join(world_poly, locations_sf, join = st_contains_properly, left=TRUE)  %>% filter(!is.na(word))
+worldmap_sort <- worldmap %>% group_by(FIPS) %>% count()
+
+country_uncount <- st_join(world_poly, worldmap, by = "FIPS") 
+country_count <- st_join(world_poly, worldmap_sort, by = "FIPS") 
+country_count <- country_count %>% distinct(FIPS.x, .keep_all= TRUE)
+
+ggplot(data= world) +
+  geom_sf(alpha = 0.7) +
+  xlab("Longitude") + ylab("Latitude") +
+  geom_point(data=locations, 
+             aes(x=lat, y=lon, colour= title), 
+             pch=20, size=4, alpha=I(0.7))+
+  ggtitle("Toponym locations from english novel") + 
+  theme(legend.position = "none")
+
+ggplot(data= world) +
+  geom_sf(alpha = 0.7) +
+  xlab("Longitude") + ylab("Latitude") +
+  geom_point(data=locations_unfiltered, 
+             aes(x=lat, y=lon, colour= entity), 
+             pch=20, size=4, alpha=I(0.7))+
+  ggtitle("NER token entities for toponym locations")+
+  scale_colour_discrete("NER token entity")
+
+
+ggplot() +
+  geom_sf(data= world,alpha = 0.7) +
+  xlab("Longitude") + ylab("Latitude") +
+  geom_point(data=locations_filtered, 
+             aes(x=lat, y=lon, colour= title), 
+             pch=20, size=4, alpha=I(0.7))+
+  ggtitle("Toponym locations from english novel filtered") + 
+  theme(legend.position = "none")
+
+ggplot(data = world) +
+  geom_sf(alpha = 0.7)+
+  xlab("Longitude") + ylab("Latitude") +
+  geom_point(data=locations_complete, 
+             aes(x=lat, y=lon, color = birthdate), 
+             size=4, alpha=I(0.7))+
+  ggtitle("Subject toponym locations from english novel unfiltered") +
+  scale_colour_viridis_c("Birthdate")+ 
+  scale_x_continuous(breaks = seq(-180, 180, by = 20))+ 
+  scale_y_continuous(breaks = seq(-60, 60, by = 20))
+
+library(RColorBrewer)
+palette = colorRampPalette(brewer.pal(n=51, name='Oranges'))(51)
+palette = c("white", palette)
+# create map
+ggplot() +
+  geom_sf(data=world_poly, lwd = .5)+
+  geom_sf(data = worldmap_sort, aes(fill = n)) +
+  scale_fill_viridis_c() +
+  # customize legend title
+  labs(fill = "Locations per country") +
+  theme(panel.grid.minor = element_blank())+
+  ggtitle("Toponym locations from english novels counted by country")+
+  xlab("Longitude") + ylab("Latitude")
+#+ theme(legend.position = "none")
+
+#######.. DONE!
+
+# {Analysis} ----------------------------------------------------------------------------------
+
+((nrow(locations)/nrow(NER))*100) #Filtered accuracy
+((nrow(locations_unfiltered)/nrow(NER_complete))*100) #Uniltered accuracy
+((nrow(locations_filtered)/nrow(NER_filtered))*100) #Filtered accuracy
+
+##Variance
+locations_var <- locations_unfiltered %>% group_by(token) %>% mutate(mean_lon = mean(lon),
+                                                                          mean_lat = mean(lat))
+
+locations_var <- locations_var %>% mutate(diff_lon = lon - mean_lon,
+                                          diff_lat = lat - mean_lat)
+locations_var <- locations_var %>% group_by(token) %>% mutate(var_lon = mean(diff_lon),
+                                                                     var_lat = mean(diff_lat))
+
+locations_var_dist <- locations_var %>% distinct(token, .keep_all= TRUE)
+locations_var_sf <- locations_var %>% st_as_sf(coords = c("lat", "lon"), crs = 4326)
+locations_var_sf_world <- st_join(world_poly, locations_var_sf, join = st_contains_properly, left=TRUE) %>% 
+  filter(!is.na(token))
+
+locations_var_sf_world <- locations_var_sf_world %>% group_by(FIPS) %>% mutate(var_lon_con = mean(var_lon),
+                                                                                var_lat_lat = mean(var_lat))
+locations_var_sf_world <- left_join(locations_var_sf_world, locations_w_author, by = "doc_id")
+
+ggplot()+
+  geom_point(data = locations_var_sf_world, aes(x=diff_lat, y=diff_lon, color = NAME))+
+  ggtitle("Variance of lognitude and lattitude of toponym locations from english novels")+ 
+  xlab("Variance Longitude") + ylab("Variance Latitude")
+
+## AGAR
+count_GBP_B <- NER_complete %>% count(entity == "GPE_B")
+count_GBP_B %>% filter(-c(`entity == "GPE_B"` == TRUE))
+
+AGAR_filtered_word <- (nrow(NER_filtered)/nrow(tidy_books))/nrow(locations_filtered)
+AGAR_unfiltered <- (nrow(NER_complete)/nrow(tidy_books))/nrow(locations_unfiltered)
+AGAR_filtered <- (nrow(NER)/nrow(tidy_books))/nrow(locations)
+AGAR_GPE <- (2541/nrow(tidy_books))/nrow(locations)
+
+AGAR_filtered
+AGAR_filtered_word
+AGAR_unfiltered
+AGAR_GPE
+
+##
+w1 = st_bbox(c(xmin = min(locations$lat), ymin = min(locations$lon), xmax = max(locations$lat), ymax = max(locations$lon))) %>% st_as_sfc()
+pp1 = c(w1, st_geometry(locations_sf)) %>% as.ppp()
+
+####
+
+Q <- quadratcount(pp1, nx= 10, ny= 5)
+hist(Q, main=NULL, las = 1, freq = TRUE)
+
+## Local Outlier factor
+locations_crd <- st_coordinates(locations_unfiltered_sf)
+
+lof <- dbscan::lof(locations_crd, minPts = 4)
+lof
+
+summary(lof)
+
+plot(locations_crd, pch = ".", main = "Lcoal outlier factor (k = 4)",
+     xlab="Longitude (scaled)", ylab="Latitude (scaled)")
+plot(world_poly, add= TRUE, lwd =.3, col = "ghostwhite")  # Plot map
+points(locations_crd, cex = (lof - 1) * 3, pch = 1, col = "red", lwd = 1)
+
+##
+ann.p <- mean(nndist(locations_sf, k=1))
+ann.p
+
+quadrat.test(pp1, nx = 20, ny = 20)
+
+### Density
+K1 <- density(pp1, sigma = 100) # Using the default bandwidth
+plot(K1, main= "Kernel density estimation on the toponym locations", las=1)
+plot(world_poly, add= TRUE, lwd =.3, col = "ghostwhite")  # Plot map
+contour(K1, add=TRUE)
+
+### Linear Models
+location.dists <- as.matrix(dist(cbind(locations_w_author$lon, locations_w_author$lat)))
+
+location.dists.inv <- 1/location.dists
+diag(location.dists.inv) <- 0
+prediction <- predict(lm(locations_w_author$birthdate~location.dists))
+
+plot(location.dists.inv, main = "Lcoal outlier factor (k = 4)",
+     xlab="Longitude (scaled)", ylab="Latitude (scaled)")
+summary(location.dists.inv)
+
+locations_model1 <- lm(data = locations_var_sf_world, UN ~ birthdate + deathdate + lon + lat)
+
+summary(locations_model1)
+
+plot(locations_model1)
+
+country_uncount[is.na(country_uncount)] <- 0
+nb <- poly2nb(country_uncount, queen=TRUE)
+lw <- nb2listw(nb, style="W", zero.policy=TRUE)
+moran(country_uncount$birthdate, listw = lw,length(nb), Szero(lw), zero.policy = TRUE)[1]
+moran.test(country_uncount$birthdate,lw, alternative="greater",zero.policy=TRUE)
+moran.mc(country_uncount$birthdate, lw, nsim=999, alternative="greater",zero.policy=TRUE)
+
+locations_var_sf_world[is.na(locations_var_sf_world)] <- 0
+nb <- poly2nb(locations_var_sf_world, queen=TRUE)
+lw <- nb2listw(nb, style="W", zero.policy=TRUE)
+moran(country_uncount$birthdate, listw = lw,length(nb), Szero(lw), zero.policy = TRUE)[1]
+moran.test(country_uncount$birthdate,lw, alternative="greater",zero.policy=TRUE)
+moran.mc(country_uncount$birthdate, lw, nsim=999, alternative="greater",zero.policy=TRUE)
+
+
+### [Output]
+
+st_write(locations_sf, "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/locations.shp")
+write_csv(locations, "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/locations.csv")
+write_csv(novels_random, "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/novels.csv")
+write_csv(NER, "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/NER.csv")
+write_csv(original_books, "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/text.csv")
+write_csv(NER_sort, "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/Wordtypes.csv")
+write.table(full_text, file = "/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/full_text.txt")

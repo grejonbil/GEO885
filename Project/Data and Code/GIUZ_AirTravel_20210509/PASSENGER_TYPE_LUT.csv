@@ -1,0 +1,8 @@
+"PASSENGER_TYPE","CountOfPASSENGER_TYPE","PASSENGER_TYPE_SHORT"
+,0,"unknown"
+"Doktorierende",108,"PhD candidate"
+"Nicht an der UZH angestellte Person (z.B. Gast, externe Doktorierende)",244,"guest"
+"ProfessorIn",146,"professor"
+"Sonstige am Institut beschäftigte Person mit Doktortitel",215,"employee with PhD"
+"Sonstige am Institut beschäftigte Person ohne Doktortitel (ohne Doktorierende)",82,"employee without PhD"
+"unbekannt",56,"unknown"
