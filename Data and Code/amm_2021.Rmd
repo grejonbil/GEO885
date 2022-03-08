@@ -35,15 +35,15 @@ library(slider)
 ## Data 
 ```{r read data}
 air_travel <- read.csv(
-  file="../data/GIUZ_AirTravel_20210509/AIRTRAVELS.csv",
+  file="~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/AIRTRAVELS.csv",
   header = T, sep = ",", stringsAsFactors = F)
 
 staff <- read.csv(
-  file="../data/GIUZ_AirTravel_20210509/DIVISION_STAFF_COUNT.csv",
+  file="~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/DIVISION_STAFF_COUNT.csv",
   header = T, sep = ",", stringsAsFactors = F)
 
 iata_codes <- read.csv(
-  file = "../data/GIUZ_AirTravel_20210509/airports.csv",
+  file = "~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/airports.csv",
   header = T, sep = ",", stringsAsFactors = F, na.strings = "", 
   encoding = "UTF-8")
 
@@ -258,6 +258,80 @@ aggregated_reason <- air_travel %>%
 aggregated_giuz_function <- air_travel %>% 
   group_by(year, giuz_function) %>%
   summarise(total_distance = sum(distance)) 
+```
+```{r}
+airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
+airports <- subset(airports, iata_code != "")
+
+airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
+
+amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
+                      dep_country = iso_country)
+
+amm <- amm %>% subset(DIVISION != "Support&Mangement")
+amm <- left_join(amm,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm <- amm %>% rename(dep_coordinates = coordinates,
+                      dep_country = iso_country)
+amm <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm <- amm %>% rename(arr_coordinates = coordinates,
+                      arr_country = iso_country)
+
+```
+
+```{r}
+
+ggplot() +
+  geom_sf(data=world, lwd = .5)+
+  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
+  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
+  labs(fill = "Flight type") +
+  theme(panel.grid.minor = element_blank())+
+  ggtitle("Departure and arrival locations for all GIUZ flights separated by symbols")+
+  xlab("Longitude") + ylab("Latitude")
+
+```
+
+```{r}
+amm_arr <- st_as_sf(amm_arr)
+
+flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
+flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
+flightmap_sort
+
+# create map
+ggplot() +
+  geom_sf(data=world)+
+  geom_sf(data = flightmap_sort, aes(fill = n)) +
+  labs(fill = "Locations per country") +
+  scico::scale_fill_scico(palette = "bilbao")+  
+  theme(panel.grid.minor = element_blank())+
+  ggtitle("Arrival locations for all GIUZ flights counnted by country")+
+  xlab("Longitude") + ylab("Latitude")+
+  theme(legend.position = "none")
+
+```
+
+
+```{r Flightpath}
+
+flightpath <- cbind(amm$DEPARTURE_AIRPORT,
+                     amm$ARRIVAL_AIRPORT) %>% as.data.frame()
+flightpath <- flightpath %>% rename(Departure = V1,
+                                    Arrival = V2)
+flightpath <- subset(flightpath, Departure != "" & Arrival != "")
+
+
+plot_flights(flightpath)
+
+lines <- amm %>% rowwise() %>% gcIntermediate(dep_coordinates, arr_coordinates, n=50)
+
+ggplot() +
+  geom_sf(data=world, lwd = .5)+
+  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
+  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
+  geom_line()
+
 ```
 
 ```{r compute baselines distances}
@@ -686,12 +760,6 @@ giuz_function_plot <- ggplot(aggregated_giuz_function, aes(fill=giuz_function,
     theme_bw() + 
     theme(legend.position = c(0.86, 0.7))
 
-ggsave("giuz_function_plot.png", giuz_function_plot, width = 7, height=5)
-gA <- ggplotGrob(giuz_function_plot)
-gB <- ggplotGrob(reasons_plot)
-g <- grid.newpage()
-g <- cbind(gA, gB)
-
 giuz_function_plot
 # ggsave(file="reason_function_plot.png", g,
 #        width = 15,
@@ -912,9 +980,6 @@ all_trains_plot <- ggplot(all_trains_scenario) +
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         legend.position = c(0.8, 0.35)) 
-
-ggsave("all_trains.png", all_trains_plot, width = 10, height=7)
-
 
 ```
 

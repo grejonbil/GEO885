@@ -10,15 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 Sys.setenv(LANG = "en")
 
 
-library(rworldmap)
-library(rworldxtra)
-library(rjson)
 library(tidyverse)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggmap)
 library(flightplot)
+library(sf)
+library(shiny)
+library(geosphere)
 
 
 ```
@@ -41,6 +41,8 @@ airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), c
 amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
                       dep_country = iso_country)
+
+amm <- amm %>% subset(DIVISION != "Support&Mangement")
 amm <- left_join(amm,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
 amm <- amm %>% rename(dep_coordinates = coordinates,
                       dep_country = iso_country)
@@ -56,6 +58,7 @@ ggplot() +
   geom_sf(data=world, lwd = .5)+
   geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
   geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
+  labs(fill = "Flight type") +
   theme(panel.grid.minor = element_blank())+
   ggtitle("Departure and arrival locations for all GIUZ flights separated by symbols")+
   xlab("Longitude") + ylab("Latitude")
@@ -66,26 +69,25 @@ ggplot() +
 amm_arr <- st_as_sf(amm_arr)
 
 flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
-flightmap_sort <- flightmap %>% group_by(FIPS) %>% count()
+flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
 flightmap_sort
 
-library(RColorBrewer)
-palette = colorRampPalette(brewer.pal(n=51, name='Oranges'))(51)
-palette = c("white", palette)
 # create map
 ggplot() +
-  geom_sf(data=world, lwd = .02)+
+  geom_sf(data=world)+
   geom_sf(data = flightmap_sort, aes(fill = n)) +
-  scale_fill_viridis_c() +
   labs(fill = "Locations per country") +
+  scico::scale_fill_scico(palette = "bilbao")+  
   theme(panel.grid.minor = element_blank())+
   ggtitle("Arrival locations for all GIUZ flights counnted by country")+
-  xlab("Longitude") + ylab("Latitude")
+  xlab("Longitude") + ylab("Latitude")+
+  theme(legend.position = "none")
 
 ```
 
 
-```{r}
+```{r Flightpath}
+
 flightpath <- cbind(amm$DEPARTURE_AIRPORT,
                      amm$ARRIVAL_AIRPORT) %>% as.data.frame()
 flightpath <- flightpath %>% rename(Departure = V1,
@@ -94,5 +96,22 @@ flightpath <- subset(flightpath, Departure != "" & Arrival != "")
 
 
 plot_flights(flightpath)
+
+lines <- amm %>% rowwise() %>% gcIntermediate(dep_coordinates, arr_coordinates, n=50)
+
+ggplot() +
+  geom_sf(data=world, lwd = .5)+
+  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
+  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
+  geom_line()
+
+
+```
+```{r FLight Statistic}
+amm_emissions <- amm %>% 
+  group_by(YEAR) %>% 
+  summarise(total_emission = sum(EMISSIONS_KGCO2EQ))
+
+
 ```
 
