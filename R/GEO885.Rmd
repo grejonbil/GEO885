@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 Sys.setenv(LANG = "en")
 
-
 library(tidyverse)
 library(dplyr)
 library(tidyr)
@@ -106,6 +105,7 @@ ggplot() +
   geom_line(lines)
 
 ```
+
 ```{r FLight Statistic}
 # Total air travel at Giuz
 total_co2_plot <- ggplot() + 
