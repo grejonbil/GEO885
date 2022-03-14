@@ -19,7 +19,6 @@ library(sf)
 library(shiny)
 library(geosphere)
 
-
 ```
 
 ```{r}
