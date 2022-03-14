@@ -103,15 +103,110 @@ ggplot() +
   geom_sf(data=world, lwd = .5)+
   geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
   geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
-  geom_line()
-
+  geom_line(lines)
 
 ```
 ```{r FLight Statistic}
-amm_emissions <- amm %>% 
-  group_by(YEAR) %>% 
-  summarise(total_emission = sum(EMISSIONS_KGCO2EQ))
+# Total air travel at Giuz
+total_co2_plot <- ggplot() + 
+  geom_line(data=reference_co2, 
+            aes(x, y, color="target GIUZ"), size=1) +
+  geom_line(data=uzh_reference_co2,  aes(x, y, color="target UZH"), size=1) +
+  geom_hline(yintercept=baseline_co2_high, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_co2_low, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_line(data=target_co2, 
+            aes(x, y, color="target GIUZ"), linetype="dashed", 
+            size=1) + 
+  geom_line(data=uzh_target_co2, 
+            aes(x, y, color="target UZH"), linetype="dashed",  
+            size=1) + 
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=total_emission, color="observed"),
+            size=1) +
+  geom_point(data=aggregated_giuz, 
+              aes(x=year, y=total_emission),
+              color=orange, size=3) +
+  ylab("kg CO2 eq.") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0,max_co2*1.02)) +
+  ggtitle("GIUZ air travel (2017-2020): emissions")+
+  scale_colour_manual("", 
+                      breaks = c("observed", "target GIUZ","target UZH"),
+                      values = c( orange, green, red))+
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.35)) 
 
+co2_per_capita_plot <- ggplot() + 
+  geom_line(data=reference_co2_per_capita, 
+            aes(x, y, color="target GIUZ"), size=1) +
+  geom_line(data=uzh_reference_co2_per_capita,  
+            aes(x, y, color="target UZH"), size=1) +
+  geom_hline(yintercept=baseline_co2_high_per_capita, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=baseline_co2_low_per_capita, 
+            size=0.5, color="grey", linetype = "dashed") +
+  geom_line(data=target_co2_per_capita, 
+            aes(x, y, color="target GIUZ"), linetype="dashed", 
+            size=1) + 
+  geom_line(data=uzh_target_co2_per_capita, 
+            aes(x, y, color="target UZH"), linetype="dashed",  
+            size=1) + 
+  geom_line(data=aggregated_giuz, 
+            aes(x=year, y=emission_per_capita, color="observed"),
+            size=1) +
+  geom_point(data=aggregated_giuz, 
+              aes(x=year, y=emission_per_capita),
+              color=orange, size=3) +
+  ylab("kg CO2 eq. per capita") +
+  scale_x_continuous(breaks=full_period,
+                     limits=c(min(full_period),
+                              max(full_period))) +
+  scale_y_continuous(label=comma,
+                     limits=c(0,max_co2_per_capita*1.02)) +
+  ggtitle("GIUZ air travel (2017-2020): emissions")+
+  scale_colour_manual("", 
+                      breaks = c("observed", "target GIUZ","target UZH"),
+                      values = c( orange, green, red))+
+  theme_bw() +
+  theme(text = element_text(size=16),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(0.8, 0.25)) 
+
+
+ggsave(file="total_co2_plot.png", total_co2_plot,
+       width = 10,
+       height= 5)
+
+
+ggsave(file="co2_per_capita_plot.png", co2_per_capita_plot,
+       width = 10,
+       height= 5)
+
+gA <- ggplotGrob(total_co2_plot)
+gB <- ggplotGrob(co2_per_capita_plot)
+g <- grid::grid.newpage()
+g <- rbind(gA, gB)
+
+ggsave(file="flight_emission.png", g,
+       width = 10,
+       height= 7)
+
+grid.draw(g)
+  
+```
 
 ```
 
