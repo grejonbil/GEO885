@@ -84,14 +84,13 @@ ggplot() +
 ```
 
 
-```{r Flightpath}
+# ```{r Flightpath}
 
 flightpath <- cbind(amm$DEPARTURE_AIRPORT,
                      amm$ARRIVAL_AIRPORT) %>% as.data.frame()
 flightpath <- flightpath %>% rename(Departure = V1,
                                     Arrival = V2)
 flightpath <- subset(flightpath, Departure != "" & Arrival != "")
-
 
 plot_flights(flightpath)
 
@@ -102,8 +101,103 @@ ggplot() +
   geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
   geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
   geom_line(lines)
+#```
+
+```{r}
+average_co2_17_20 <- amm %>% group_by(YEAR) %>% summarize(mean = mean(EMISSIONS_KGCO2EQ))
 
 ```
+
+
+```{r compute baselines CO2}
+
+# Define baseline
+baseline_co2 <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
+  pull(mean)
+
+baseline_co2_low <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(min = min(total_emission, na.rm=TRUE)) %>%
+  pull(min) 
+
+baseline_co2_high <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(max = max(total_emission, na.rm=TRUE)) %>%
+  pull(max) 
+
+# UZH: only 2018 and 2019
+uzh_baseline_co2 <- aggregated_giuz %>%
+  filter(year %in% reference_period[-1]) %>%
+  summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
+  pull(mean)
+
+# per capita 
+baseline_co2_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(mean = mean(emission_per_capita, na.rm=TRUE)) %>%
+  pull(mean) 
+
+baseline_co2_low_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(min = min(emission_per_capita, na.rm=TRUE)) %>%
+  pull(min) 
+
+baseline_co2_high_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period) %>%
+  summarize(max = max(emission_per_capita, na.rm=TRUE)) %>%
+  pull(max) 
+
+# UZH: only 2018 and 2019
+uzh_baseline_co2_per_capita <- aggregated_giuz %>%
+  filter(year %in% reference_period[-1]) %>%
+  summarize(mean = mean(emission_per_capita, na.rm=TRUE)) %>%
+  pull(mean) 
+
+# Define reference
+reference_co2 <- data.frame(x=reference_period,
+                            y=rep(baseline_co2, length(reference_period)))
+
+uzh_reference_co2 <- data.frame(x=reference_period,
+                                y=rep(uzh_baseline_co2, length(reference_period)))
+
+# per capita
+reference_co2_per_capita <- data.frame(x=reference_period,
+                                       y=rep(baseline_co2_per_capita,
+                                       length(reference_period)))
+
+uzh_reference_co2_per_capita <- data.frame(x=reference_period[-1],
+                                y=rep(uzh_baseline_co2_per_capita,
+                                      length(reference_period[-1])))
+
+# Define target
+target_co2 <- data.frame(x=target_period,
+                         y=c(baseline_co2, baseline_co2 * 0.75)) 
+
+perc_2025 <- 0.6 - ((0.6 - 0.47) * (2030 - 2025) / (2030 -2022))
+
+uzh_target_co2 <- data.frame(x=target_period,
+                             y=c(uzh_baseline_co2 * 0.60, 
+                                 uzh_baseline_co2 * perc_2025)) 
+
+# per capita
+target_co2_per_capita <- data.frame(x=target_period,
+                                    y=c(baseline_co2_per_capita,
+                                    baseline_co2_per_capita * 0.75)) 
+
+uzh_target_co2_per_capita <- data.frame(x=target_period,
+                                        y=c(uzh_baseline_co2_per_capita * 0.60,
+                                            uzh_baseline_co2_per_capita * perc_2025)) 
+
+# Maximum total distance per year
+max_co2 <- max(aggregated_giuz$total_emission) 
+
+# per capita
+max_co2_per_capita <-max(aggregated_giuz$emission_per_capita) 
+
+```
+
 
 ```{r FLight Statistic}
 # Total air travel at Giuz
@@ -207,5 +301,4 @@ grid.draw(g)
   
 ```
 
-```
 
