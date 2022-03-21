@@ -1,5 +1,5 @@
 ---
-title: "GEO885 - GIUZ"
+title: "GEO885 - MNF"
 author: "Gregory Biland"
 date: "3/7/2022"
 output: html_document
@@ -24,9 +24,12 @@ library(geosphere)
 ```{r}
 airports <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/airports.csv")
 
-amm_giuz <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/AIRTRAVELS.csv")
+amm <- read_excel("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/MNF_amm.xlsx")
 
 world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/TM_WORLD_BORDERS_SIMPL-0 Kopie")
+
+amm_distance <- amm
+airports_distance <- airports
 
 ```
 
@@ -34,19 +37,55 @@ world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885
 airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
 airports <- subset(airports, iata_code != "")
 
+
+airports_distance <- airports_distance %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
+airports_distance <- subset(airports_distance, iata_code != "")
+
+
 airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
+
+amm <- amm %>% rename(DEPARTURE_AIRPORT = Abflug,
+                      ARRIVAL_AIRPORT = Destination)
+amm$Serviceklasse[amm$Serviceklasse == "Y"] <- "Economy Class"
+amm$Serviceklasse[amm$Serviceklasse == "B"] <- "Business Class"
+amm$Serviceklasse[amm$Serviceklasse == "F"] <- "First Class"
+amm$Serviceklasse[amm$Serviceklasse == "P"] <- "Premium Economy Class"
 
 amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
                       dep_country = iso_country)
 
-amm <- amm %>% subset(DIVISION != "Support&Mangement")
 amm <- left_join(amm,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
 amm <- amm %>% rename(dep_coordinates = coordinates,
                       dep_country = iso_country)
 amm <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm <- amm %>% rename(arr_coordinates = coordinates,
                       arr_country = iso_country)
+
+drop <- c("Kosten (in CHF)", "id.x", "id.y")
+amm = amm[,!(names(amm) %in% drop)]
+```
+
+```{r Distances}
+amm_distance <- left_join(amm_distance,airports_distance, by = c("Abflug" = "iata_code"))
+amm_distance <- left_join(amm_distance, airports_distance, by = c("Destination" = "iata_code"))
+
+amm_distance <- amm_distance %>% rename(dep_lon = longitude_deg.x,
+                                        dep_lat = latitude_deg.x,
+                                        arr_lon = longitude_deg.y,
+                                        arr_lat = latitude_deg.y)
+
+amm_distance <- amm_distance %>% rowwise() %>% 
+    mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
+                                  c(arr_lon, arr_lat)))/1000)
+
+view(amm_distance)
+view(airports_distance)
+
+amm_distance_count <- amm_distance %>% group_by(Jahr) %>% summarize(sum = sum(distance_km, na.rm=TRUE))
+
+ggplot(amm_distance_count, aes(x=Jahr, y = sum))+
+  geom_line()
 
 ```
 
@@ -68,7 +107,7 @@ amm_arr <- st_as_sf(amm_arr)
 
 flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
 flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
-flightmap_sort
+view(flightmap_sort)
 
 # create map
 ggplot() +
@@ -82,7 +121,6 @@ ggplot() +
   theme(legend.position = "none")
 
 ```
-
 
 # ```{r Flightpath}
 
