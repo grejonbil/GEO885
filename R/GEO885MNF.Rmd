@@ -18,6 +18,7 @@ library(flightplot)
 library(sf)
 library(shiny)
 library(geosphere)
+library(readxl)
 
 ```
 
@@ -45,7 +46,8 @@ airports_distance <- subset(airports_distance, iata_code != "")
 airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
 
 amm <- amm %>% rename(DEPARTURE_AIRPORT = Abflug,
-                      ARRIVAL_AIRPORT = Destination)
+                      ARRIVAL_AIRPORT = Destination,
+                      EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)")
 amm$Serviceklasse[amm$Serviceklasse == "Y"] <- "Economy Class"
 amm$Serviceklasse[amm$Serviceklasse == "B"] <- "Business Class"
 amm$Serviceklasse[amm$Serviceklasse == "F"] <- "First Class"
@@ -61,6 +63,7 @@ amm <- amm %>% rename(dep_coordinates = coordinates,
 amm <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm <- amm %>% rename(arr_coordinates = coordinates,
                       arr_country = iso_country)
+amm <- amm %>% mutate(EMISSIONS_KGCO2EQ = (EMISSIONS_KGCO2EQ * 1000))
 
 drop <- c("Kosten (in CHF)", "id.x", "id.y")
 amm = amm[,!(names(amm) %in% drop)]
@@ -82,24 +85,31 @@ amm_distance <- amm_distance %>% rowwise() %>%
 view(amm_distance)
 view(airports_distance)
 
-amm_distance_count <- amm_distance %>% group_by(Jahr) %>% summarize(sum = sum(distance_km, na.rm=TRUE))
+amm_distance_count <- amm_distance %>% group_by(Jahr) %>% summarize(distance_sum = sum(distance_km, na.rm=TRUE))
 
-ggplot(amm_distance_count, aes(x=Jahr, y = sum))+
+ggplot(amm_distance_count, aes(x=Jahr, y = distance_sum))+
   geom_line()
 
+ggplot(amm_distance, aes(factor(Jahr), distance_km, col = Serviceklasse))+ 
+  geom_point(size = .5)
+
+
+amm_emissions_byyear <- amm %>% group_by(Jahr) %>% summarize(emissions_sum_kg = sum(EMISSIONS_KGCO2EQ, na.rm=TRUE))
+
+ggplot(amm_emissions_byyear, aes(x=Jahr, y = emissions_sum_kg))+
+  geom_line()
+
+ggplot(amm, aes(factor(Jahr), EMISSIONS_KGCO2EQ, col = Serviceklasse))+ 
+  geom_point(size = .5)
 ```
 
 ```{r}
-
 ggplot() +
-  geom_sf(data=world, lwd = .5)+
-  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
-  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
-  labs(fill = "Flight type") +
-  theme(panel.grid.minor = element_blank())+
+  geom_sf(data=world)+
+  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = 1, shape = 23) +
+  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = 1, shape = 23) +
   ggtitle("Departure and arrival locations for all GIUZ flights separated by symbols")+
   xlab("Longitude") + ylab("Latitude")
-
 ```
 
 ```{r}
@@ -122,8 +132,7 @@ ggplot() +
 
 ```
 
-# ```{r Flightpath}
-
+```{r Flightpath}
 flightpath <- cbind(amm$DEPARTURE_AIRPORT,
                      amm$ARRIVAL_AIRPORT) %>% as.data.frame()
 flightpath <- flightpath %>% rename(Departure = V1,
@@ -139,204 +148,71 @@ ggplot() +
   geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
   geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
   geom_line(lines)
-#```
+```
 
 ```{r}
-average_co2_17_20 <- amm %>% group_by(YEAR) %>% summarize(mean = mean(EMISSIONS_KGCO2EQ))
+average_co2_18_20 <- amm %>% group_by(Jahr) %>% summarize(mean = mean(EMISSIONS_KGCO2EQ, na.rm=TRUE))
+baseline_co2 <- mean(average_co2_18_20$mean)
 
 ```
 
 
 ```{r compute baselines CO2}
+reference_period <- c(2018:2020)
+target_period <- c(2022, 2030)
+full_period <- c(2018:2030)
 
-# Define baseline
-baseline_co2 <- aggregated_giuz %>%
-  filter(year %in% reference_period) %>%
+aggregated_uzh <- amm %>% 
+  group_by(Jahr) %>% 
+  summarise(total_emission = sum(EMISSIONS_KGCO2EQ, na.rm=TRUE)) %>%
+  mutate(total_emission_3y_mean = slide_dbl(total_emission, mean, 
+                                            .before = 1, .after = 1,
+                                            .complete = T)) 
+# UZH: only 2018 and 2019
+uzh_baseline_co2 <- aggregated_uzh %>%
+  filter(Jahr %in% reference_period[]) %>%
   summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
   pull(mean)
 
-baseline_co2_low <- aggregated_giuz %>%
-  filter(year %in% reference_period) %>%
-  summarize(min = min(total_emission, na.rm=TRUE)) %>%
-  pull(min) 
-
-baseline_co2_high <- aggregated_giuz %>%
-  filter(year %in% reference_period) %>%
-  summarize(max = max(total_emission, na.rm=TRUE)) %>%
-  pull(max) 
-
-# UZH: only 2018 and 2019
-uzh_baseline_co2 <- aggregated_giuz %>%
-  filter(year %in% reference_period[-1]) %>%
-  summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
-  pull(mean)
-
-# per capita 
-baseline_co2_per_capita <- aggregated_giuz %>%
-  filter(year %in% reference_period) %>%
-  summarize(mean = mean(emission_per_capita, na.rm=TRUE)) %>%
-  pull(mean) 
-
-baseline_co2_low_per_capita <- aggregated_giuz %>%
-  filter(year %in% reference_period) %>%
-  summarize(min = min(emission_per_capita, na.rm=TRUE)) %>%
-  pull(min) 
-
-baseline_co2_high_per_capita <- aggregated_giuz %>%
-  filter(year %in% reference_period) %>%
-  summarize(max = max(emission_per_capita, na.rm=TRUE)) %>%
-  pull(max) 
-
-# UZH: only 2018 and 2019
-uzh_baseline_co2_per_capita <- aggregated_giuz %>%
-  filter(year %in% reference_period[-1]) %>%
-  summarize(mean = mean(emission_per_capita, na.rm=TRUE)) %>%
-  pull(mean) 
-
-# Define reference
-reference_co2 <- data.frame(x=reference_period,
-                            y=rep(baseline_co2, length(reference_period)))
-
-uzh_reference_co2 <- data.frame(x=reference_period,
-                                y=rep(uzh_baseline_co2, length(reference_period)))
-
-# per capita
-reference_co2_per_capita <- data.frame(x=reference_period,
-                                       y=rep(baseline_co2_per_capita,
-                                       length(reference_period)))
-
-uzh_reference_co2_per_capita <- data.frame(x=reference_period[-1],
-                                y=rep(uzh_baseline_co2_per_capita,
-                                      length(reference_period[-1])))
 
 # Define target
-target_co2 <- data.frame(x=target_period,
-                         y=c(baseline_co2, baseline_co2 * 0.75)) 
-
-perc_2025 <- 0.6 - ((0.6 - 0.47) * (2030 - 2025) / (2030 -2022))
+perc_2030 <- 0.6 - ((0.6 - 0.47) * (2030 - 2025) / (2030 -2022))
 
 uzh_target_co2 <- data.frame(x=target_period,
                              y=c(uzh_baseline_co2 * 0.60, 
                                  uzh_baseline_co2 * perc_2025)) 
 
-# per capita
-target_co2_per_capita <- data.frame(x=target_period,
-                                    y=c(baseline_co2_per_capita,
-                                    baseline_co2_per_capita * 0.75)) 
-
-uzh_target_co2_per_capita <- data.frame(x=target_period,
-                                        y=c(uzh_baseline_co2_per_capita * 0.60,
-                                            uzh_baseline_co2_per_capita * perc_2025)) 
-
-# Maximum total distance per year
-max_co2 <- max(aggregated_giuz$total_emission) 
-
-# per capita
-max_co2_per_capita <-max(aggregated_giuz$emission_per_capita) 
+max_co2 <- max(aggregated_uzh$total_emission) 
 
 ```
 
 
 ```{r FLight Statistic}
+
 # Total air travel at Giuz
 total_co2_plot <- ggplot() + 
-  geom_line(data=reference_co2, 
-            aes(x, y, color="target GIUZ"), size=1) +
-  geom_line(data=uzh_reference_co2,  aes(x, y, color="target UZH"), size=1) +
-  geom_hline(yintercept=baseline_co2_high, 
-            size=0.5, color="grey", linetype = "dashed") +
-  geom_hline(yintercept=baseline_co2_low, 
-            size=0.5, color="grey", linetype = "dashed") +
-  geom_line(data=target_co2, 
-            aes(x, y, color="target GIUZ"), linetype="dashed", 
-            size=1) + 
   geom_line(data=uzh_target_co2, 
             aes(x, y, color="target UZH"), linetype="dashed",  
             size=1) + 
-  geom_line(data=aggregated_giuz, 
-            aes(x=year, y=total_emission, color="observed"),
-            size=1) +
-  geom_point(data=aggregated_giuz, 
-              aes(x=year, y=total_emission),
-              color=orange, size=3) +
   ylab("kg CO2 eq.") +
   scale_x_continuous(breaks=full_period,
                      limits=c(min(full_period),
                               max(full_period))) +
   scale_y_continuous(label=comma,
                      limits=c(0,max_co2*1.02)) +
-  ggtitle("GIUZ air travel (2017-2020): emissions")+
+  ggtitle("UZH air travel (2018-2020): emissions")+
   scale_colour_manual("", 
-                      breaks = c("observed", "target GIUZ","target UZH"),
-                      values = c( orange, green, red))+
+                      breaks = c("target UZH"),
+                      values = c("orange"))+
   theme_bw() +
   theme(text = element_text(size=16),
         axis.title.x = element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
-        legend.position = c(0.8, 0.35)) 
+        legend.position = c(0, 0))
 
-co2_per_capita_plot <- ggplot() + 
-  geom_line(data=reference_co2_per_capita, 
-            aes(x, y, color="target GIUZ"), size=1) +
-  geom_line(data=uzh_reference_co2_per_capita,  
-            aes(x, y, color="target UZH"), size=1) +
-  geom_hline(yintercept=baseline_co2_high_per_capita, 
-            size=0.5, color="grey", linetype = "dashed") +
-  geom_hline(yintercept=baseline_co2_low_per_capita, 
-            size=0.5, color="grey", linetype = "dashed") +
-  geom_line(data=target_co2_per_capita, 
-            aes(x, y, color="target GIUZ"), linetype="dashed", 
-            size=1) + 
-  geom_line(data=uzh_target_co2_per_capita, 
-            aes(x, y, color="target UZH"), linetype="dashed",  
-            size=1) + 
-  geom_line(data=aggregated_giuz, 
-            aes(x=year, y=emission_per_capita, color="observed"),
-            size=1) +
-  geom_point(data=aggregated_giuz, 
-              aes(x=year, y=emission_per_capita),
-              color=orange, size=3) +
-  ylab("kg CO2 eq. per capita") +
-  scale_x_continuous(breaks=full_period,
-                     limits=c(min(full_period),
-                              max(full_period))) +
-  scale_y_continuous(label=comma,
-                     limits=c(0,max_co2_per_capita*1.02)) +
-  ggtitle("GIUZ air travel (2017-2020): emissions")+
-  scale_colour_manual("", 
-                      breaks = c("observed", "target GIUZ","target UZH"),
-                      values = c( orange, green, red))+
-  theme_bw() +
-  theme(text = element_text(size=16),
-        axis.title.x = element_blank(),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        legend.position = c(0.8, 0.25)) 
-
-
-ggsave(file="total_co2_plot.png", total_co2_plot,
-       width = 10,
-       height= 5)
-
-
-ggsave(file="co2_per_capita_plot.png", co2_per_capita_plot,
-       width = 10,
-       height= 5)
-
-gA <- ggplotGrob(total_co2_plot)
-gB <- ggplotGrob(co2_per_capita_plot)
-g <- grid::grid.newpage()
-g <- rbind(gA, gB)
-
-ggsave(file="flight_emission.png", g,
-       width = 10,
-       height= 7)
-
-grid.draw(g)
-  
+total_co2_plot
 ```
 
 
