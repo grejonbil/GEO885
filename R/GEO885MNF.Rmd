@@ -47,11 +47,15 @@ airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), c
 
 amm <- amm %>% rename(DEPARTURE_AIRPORT = Abflug,
                       ARRIVAL_AIRPORT = Destination,
-                      EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)")
-amm$Serviceklasse[amm$Serviceklasse == "Y"] <- "Economy Class"
-amm$Serviceklasse[amm$Serviceklasse == "B"] <- "Business Class"
-amm$Serviceklasse[amm$Serviceklasse == "F"] <- "First Class"
-amm$Serviceklasse[amm$Serviceklasse == "P"] <- "Premium Economy Class"
+                      EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)",
+                      cabin_class = Serviceklasse,
+                      currencies = "Kosten (in CHF)",
+                      year = Jahr,
+                      distance = "Distanz (in km)")
+amm$cabin_class[amm$cabin_class == "Y"] <- "economy"
+amm$cabin_class[amm$cabin_class == "B"] <- "business"
+amm$cabin_class[amm$cabin_class == "F"] <- "first"
+amm$cabin_class[amm$cabin_class == "P"] <- "premium_economy"
 
 amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
@@ -65,8 +69,10 @@ amm <- amm %>% rename(arr_coordinates = coordinates,
                       arr_country = iso_country)
 amm <- amm %>% mutate(EMISSIONS_KGCO2EQ = (EMISSIONS_KGCO2EQ * 1000))
 
-drop <- c("Kosten (in CHF)", "id.x", "id.y")
+drop <- c("id.x", "id.y")
 amm = amm[,!(names(amm) %in% drop)]
+
+write.csv(amm, file = "amm.csv")
 ```
 
 ```{r Distances}
@@ -90,7 +96,7 @@ amm_distance_count <- amm_distance %>% group_by(Jahr) %>% summarize(distance_sum
 ggplot(amm_distance_count, aes(x=Jahr, y = distance_sum))+
   geom_line()
 
-ggplot(amm_distance, aes(factor(Jahr), distance_km, col = Serviceklasse))+ 
+ggplot(amm_distance, aes(factor(Jahr), distance_km, col = cabin_class))+ 
   geom_point(size = .5)
 
 
@@ -99,7 +105,7 @@ amm_emissions_byyear <- amm %>% group_by(Jahr) %>% summarize(emissions_sum_kg = 
 ggplot(amm_emissions_byyear, aes(x=Jahr, y = emissions_sum_kg))+
   geom_line()
 
-ggplot(amm, aes(factor(Jahr), EMISSIONS_KGCO2EQ, col = Serviceklasse))+ 
+ggplot(amm, aes(factor(Jahr), EMISSIONS_KGCO2EQ, col = cabin_class))+ 
   geom_point(size = .5)
 ```
 
