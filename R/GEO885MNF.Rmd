@@ -56,6 +56,7 @@ amm$cabin_class[amm$cabin_class == "Y"] <- "economy"
 amm$cabin_class[amm$cabin_class == "B"] <- "business"
 amm$cabin_class[amm$cabin_class == "F"] <- "first"
 amm$cabin_class[amm$cabin_class == "P"] <- "premium_economy"
+amm$currencies <- "USD"
 
 amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
@@ -72,7 +73,10 @@ amm <- amm %>% mutate(EMISSIONS_KGCO2EQ = (EMISSIONS_KGCO2EQ * 1000))
 drop <- c("id.x", "id.y")
 amm = amm[,!(names(amm) %in% drop)]
 
+amm_test <- amm[1:11,]
+
 write.csv(amm, file = "amm.csv")
+write.csv(amm_test, file = "Test_Data")
 ```
 
 ```{r Distances}

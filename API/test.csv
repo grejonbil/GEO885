@@ -1,0 +1,7 @@
+﻿ID;origin;destination;cabin_class;currencies
+1;LAX;ZRH;economy;USD
+2;ZRH;LAX;first;USD
+3;ABA;ABQ;economy;USD
+4;ABF;ABA;first;USD
+5;ABW;LAX;economy;USD
+6;ABQ;ZRH;economy;USD

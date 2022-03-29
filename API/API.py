@@ -1,10 +1,18 @@
 #API
+from cgi import test
 import json
 from typing import Optional
 import pandas as pd
 import requests
 from http.client import HTTPSConnection
 from base64 import b64encode
+import csv
+from urllib.request import Request, urlopen
+import time
+from collections import defaultdict
+
+
+# auth= '464c01f7e53b2a5e6f00d9a1'
 
 def csv_files(file):  
     with open(file, encoding="utf-8") as csv:
@@ -13,87 +21,63 @@ def csv_files(file):
     print(csv_quake.info())
     return csv_quake
 
-# amm = csv_files("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm.csv")
+testCSV = csv_files("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/Test_Data.csv")
+print(testCSV)
 
-amm_test = csv_files("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/TestData.csv")
-print(amm_test)
+# testdata = {'DEPARTURE_AIRPORT': ['CGN', 'CDG', 'VIE', 'VIE', "VAR"],
+# "ARRIVAL_AIRPORT": ["ZRH", "VIE", "ZRH", "VAR", "VIE"] , 
+# 'cabin_class': ["economy","economy","economy","economy","economy"], 
+# "currencies":["USD","USD","USD","USD","USD"]}  
+# print(testdata)
 
 print("Payload ")
-def emissions(amm_test):  # Create new dictionary only with necessary values needed, using the template provided by Ross
-    test_dic = {} # New dictionary
-    for i in range(0, len(amm_test)):
-        if amm_test["origin"][i] == "origin":
-            print()
-            origin = origin
-        if amm_test["destination"][i] == "destination":
-            destination = destination
-        if amm_test["cabin_class"][i] == "cabin_class":
-            cabin_class = cabin_class
-        test_dic.update({"segments": [{ "origin": origin, "destination": destination}], "cabin_class": cabin_class, "currencies":["USD"]})
-    return payload
-
-print(emissions(amm_test))
-
-# def dic(file):
-#     segment = file['Segments']  # Create new dictionary only with necessary values needed, using the template provided by Ross
-#     gaz = {} # New dictionary
-#     for i in segment:
-#         origin = i['properties']['place']  # Names
-#         destination = i['geometry']['coordinates']  # Coordinates (x,y,z)
-#         cabin_class = i['properties']['mag']  # Magnitude
-#         gaz.update({"segments": [{ "origin": origin, "destination": destination}], "cabin_class": cabin_class, "currencies":["USD"]})
-#         # Furthermore, the z- value from each earthquake is separated from the longitude and latitude
-#     return gaz
-# gaz = dic(amm_test)
-
-# auth= '464c01f7e53b2a5e6f00d9a1'
+def emissions(testCSV):
+    result = defaultdict(list)
+    for org, arr, abc, cur in zip(*testCSV.values()):
+        result["segments"].append({
+                "origin": org,
+                "destination": arr})
+        result["cabin_class"].append(abc)
+        result["currencies"].append(cur)
+    return dict(result)
+print(emissions(test))
 
 
+data = {"segments" : [{"origin" : "CGN","destination" : "ZRH"},],"cabin_class" : "economy","currencies" : ["USD"]}
+def co2(n):
+    payload = {}
 
+    for index, segment in enumerate(n["segments"]):
+        origin = segment["origin"]
+        destination = segment["destination"]
+        # python 3.6+ needed:
+        payload[f"segments[{index}][origin]"] = origin
+        payload[f"segments[{index}][destination]"] = destination
 
-data = {
-    "segments" : [
-        { 
-            "origin" : "ABQ",
-            "destination" : "LAX"
-        },
-    ],
-    "cabin_class" : "economy",
-    "currencies" : [
-        "USD"
-    ]
-}
+    payload["cabin_class"] = n["cabin_class"]
 
-payload = {}
+    # requests can handle repeated parameters with the same name this way:
+    payload["currencies[]"] = n["currencies"]
+    print(payload)
 
-for index, segment in enumerate(data["segments"]):
-    origin = segment["origin"]
-    destination = segment["destination"]
-    # python 3.6+ needed:
-    payload[f"segments[{index}][origin]"] = origin
-    payload[f"segments[{index}][destination]"] = destination
+    response = requests.get(
+        "https://api.goclimate.com/v1/flight_footprint",
+        auth=("464c01f7e53b2a5e6f00d9a1", ""),
+        params=payload, 
+    )
 
-payload["cabin_class"] = data["cabin_class"]
+    def update(response):
+        print("API")
+        print(response.content)
+        d = response.text
+        convertedDict = json.loads(d)
+        print(convertedDict["footprint"])
+        # print(convertedDict["offset_prices"]["amount"])
 
-# requests can handle repeated parameters with the same name this way:
-payload["currencies[]"] = data["currencies"]
+        test["Emissions"] = convertedDict["footprint"]
+        #test["Price USD"] = convertedDict["offset_prices"]["amount"]
+        print(testCSV)
 
-print(payload)
+    update(response)
 
-response = requests.get(
-    "https://api.goclimate.com/v1/flight_footprint",
-    auth=("464c01f7e53b2a5e6f00d9a1", ""),
-    params=payload, 
-)
-
-def update(response):
-    print("API")
-    print(response.content)
-    d = response.text
-    convertedDict = json.loads(d)
-    print(convertedDict["footprint"])
-
-    amm_test["Emissions"] = convertedDict["footprint"]
-    print(amm_test)
-
-update(response)
+print(co2(data))
