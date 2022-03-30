@@ -1,5 +1,8 @@
 #API
+from ast import Return
+from cgi import test
 import json
+from tracemalloc import stop
 import pandas as pd
 import requests
 import csv
@@ -12,16 +15,11 @@ def csv_files(file):
     return file
 
 testCSV = csv_files("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/Test_Data.csv")
-
-print("CSV TO DICTIONARY")
-with open("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/Test_Data.csv", newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            print(row['DEPARTURE_AIRPORT'], row['ARRIVAL_AIRPORT'], row["cabin_class"], row["currencies"])
-print(row)
+testCSV["emissionsKGCO2"] =""
+print(testCSV)
 
 def emissions(file):
-    for i in range(len(file)):
+    for i in range(0, len(file)):
         print("DATA")
         def dic(file):
             gaz = {}
@@ -52,15 +50,19 @@ def emissions(file):
             params=payload, 
         )
 
-        def addObject(file):
-            d = response.text
-            convertedDict = json.loads(d)
-            print(convertedDict["footprint"])
-            #print(convertedDict["offset_prices"]["amount"])
+        d = response.text
+        convertedDict = json.loads(d)
+        footprint = convertedDict["footprint"]
 
-            testCSV["emissionsKGCO2"] = convertedDict["footprint"]
-            # testCSV["Price USD"] = convertedDict["offset_prices"]["amount"]
-            print(testCSV)
-        addObject(response)
-print(emissions(row))
+        testCSV.loc[testCSV.index[i], 'emissionsKGCO2'] = footprint
+        print(testCSV)
+
+print("CSV TO DICTIONARY")
+with open("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/Test_Data.csv", newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            print(row['DEPARTURE_AIRPORT'], row['ARRIVAL_AIRPORT'], row["cabin_class"], row["currencies"])
+            print(emissions(row))
+
+
 
