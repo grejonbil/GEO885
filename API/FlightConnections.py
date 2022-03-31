@@ -28,7 +28,7 @@ for flight_no in fln_no:
     
     # prepare request to be sent to flightradar24.com
     header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
-    req = requests.get(url='https://www.flightradar24.com/data/flights/' + flight_no, headers = header)
+    req = Request(url='https://www.flightradar24.com/data/flights/' + flight_no, headers = header)
     html = urlopen(req).read()
     
     # convert to readable string
