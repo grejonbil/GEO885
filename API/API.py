@@ -1,73 +1,51 @@
-#API
-from ast import Return
-from cgi import test
+# API
 import json
-from tracemalloc import stop
-from typing import Dict
 import pandas as pd
 import requests
-import csv
 
-# auth= '464c01f7e53b2a5e6f00d9a1'
 
-def csv_files(file):  
-    with open(file, encoding="utf-8") as csv:
-        file = pd.read_csv(csv)
-    return file
+def retrieve_emissions(origin, destination, cabin_class, currencies):
+    data = ({"segments": [{"origin": origin,
+                           "destination": destination}, ],
+             "cabin_class": cabin_class,
+             "currencies": [currencies]})
 
-testCSV = csv_files("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/Test_Data.csv")
-testCSV["emissionsKGCO2"] =""
+    # Peter: I am still not sure what the following lines do and why they are necessary
+    # Seems you have to get things into a format that go climate understands, but why do you use
+    # a for loop here when there is always only one segment per flight? Or is that different in the full data set?
+
+    payload = {}
+    for index, segment in enumerate(data["segments"]):
+        origin = segment["origin"]
+        destination = segment["destination"]
+        payload[f"segments[{index}][origin]"] = origin
+        payload[f"segments[{index}][destination]"] = destination
+
+    payload["cabin_class"] = data["cabin_class"]
+    payload["currencies[]"] = data["currencies"]
+
+    response = requests.get(
+        "https://api.goclimate.com/v1/flight_footprint",
+        auth=("464c01f7e53b2a5e6f00d9a1", ""),
+        params=payload,
+    )
+    # I added the exception here for flights with NA origin or destination, for which footprint is of course undefined
+    try:
+        footprint = json.loads(response.text)["footprint"]
+    except KeyError:
+        footprint = None
+
+    return footprint
+
+
+# I had problems reading the csv file
+# The first column does not have a header, which caused pd.read_csv to miss-align columns and column headers
+# e.g. the column with departure airports had the column header "cabin_class"
+# "Test_Data_peter.csv" has these issues fixed
+testCSV = pd.read_csv("Test_Data_peter.csv")
+
+testCSV['emissions'] = testCSV.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+                                                                  destination=x.ARRIVAL_AIRPORT,
+                                                                  cabin_class=x.cabin_class,
+                                                                  currencies=x.currencies), axis=1)
 print(testCSV)
-
-def emissions(dataset):
-    # Iterate all rows using DataFrame.itertuples()
-    for row in dataset.itertuples(index = False):
-        row = (getattr(row, "DEPARTURE_AIRPORT"), getattr(row, "ARRIVAL_AIRPORT"), getattr(row, "cabin_class"), getattr(row, "currencies"))
-        print(row)
-        j = row.to_dict("series")
-        print(j)
-        gaz = {}
-        origin = j['DEPARTURE_AIRPORT']
-        destination = j['ARRIVAL_AIRPORT']
-        cabin_class = j['cabin_class']
-        currencies = j["currencies"]
-        gaz.update({"segments": [{ "origin": origin, "destination": destination},], "cabin_class": cabin_class, "currencies":[currencies]})
-        
-        data = gaz
-
-        payload = {}
-
-        for index, segment in enumerate(data["segments"]):
-            origin = segment["origin"]
-            destination = segment["destination"]
-            # python 3.6+ needed:
-            payload[f"segments[{index}][origin]"] = origin
-            payload[f"segments[{index}][destination]"] = destination
-
-        payload["cabin_class"] = data["cabin_class"]
-        payload["currencies[]"] = data["currencies"]
-
-        response = requests.get(
-            "https://api.goclimate.com/v1/flight_footprint",
-            auth=("464c01f7e53b2a5e6f00d9a1", ""),
-            params=payload, 
-        )
-
-        d = response.text
-        convertedDict = json.loads(d)
-        footprint = convertedDict["footprint"]
-
-        testCSV.loc[testCSV.index[row], 'emissionsKGCO2'] = footprint
-    
-print(emissions(testCSV))
-
-
-# print("CSV TO DICTIONARY")
-# with open("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/API/Test_Data.csv", newline='') as csvfile:
-#         reader = csv.DictReader(csvfile)
-#         for row in reader:
-#             print(row['DEPARTURE_AIRPORT'], row['ARRIVAL_AIRPORT'], row["cabin_class"], row["currencies"])
-            
-
-
-
