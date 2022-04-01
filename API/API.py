@@ -2,6 +2,7 @@
 import json
 import pandas as pd
 import requests
+import csv
 
 
 def retrieve_emissions(origin, destination, cabin_class, currencies):
@@ -42,10 +43,14 @@ def retrieve_emissions(origin, destination, cabin_class, currencies):
 # The first column does not have a header, which caused pd.read_csv to miss-align columns and column headers
 # e.g. the column with departure airports had the column header "cabin_class"
 # "Test_Data_peter.csv" has these issues fixed
-testCSV = pd.read_csv("Test_Data_peter.csv")
+# testCSV = pd.read_csv("Test_Data_peter.csv")
+amm_test = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test.csv")
+# amm_test = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test.csv")
 
-testCSV['emissions'] = testCSV.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
                                                                   destination=x.ARRIVAL_AIRPORT,
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
-print(testCSV)
+print(amm_test)
+
+amm_test.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test_emissions.csv", index=False)
