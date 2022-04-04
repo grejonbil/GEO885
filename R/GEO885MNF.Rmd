@@ -47,7 +47,8 @@ airports_distance <- subset(airports_distance, iata_code != "")
 
 airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
 
-amm <- amm %>% rename(DEPARTURE_AIRPORT = Abflug,
+amm <- amm %>% rename(flight_numer = Flugnummer,
+                      DEPARTURE_AIRPORT = Abflug,
                       ARRIVAL_AIRPORT = Destination,
                       EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)",
                       cabin_class = Serviceklasse,

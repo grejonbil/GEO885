@@ -3,6 +3,21 @@ import json
 import pandas as pd
 import requests
 import csv
+import time
+
+tic = time.perf_counter()
+
+def retrieve_IATA(file):
+    payload = ({"flight_iata": file["flight_number"]})
+
+    answer = requests.get(
+        "https://airlabs.co/api/v9/flights?",
+        auth=("c70f45b0-ed8d-4959-b186-85a3a1871f39", ""),
+        params=payload,
+    )
+    
+    print(json.loads(answer.text)["dep_iata"])
+    print(json.loads(answer.text)["arr_iata"])
 
 
 def retrieve_emissions(origin, destination, cabin_class, currencies):
@@ -42,6 +57,12 @@ amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(orig
                                                                   destination=x.ARRIVAL_AIRPORT,
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
+
+amm_test['DEPARTURE_AIRPORT, ARRIVAL_AIRPORT'] = amm_test.apply(lambda x: retrieve_IATA(dep_code=x.DEPARTURE_AIRPORT,
+                                                                  arr_code=x.ARRIVAL_AIRPORT), axis=1)                                                                 
 print(amm_test)
 
 amm_test.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test_emissions.csv", index=False)
+
+toc = time.perf_counter()
+print(f'- time to calculate: {toc - tic:0.4f} seconds')
