@@ -1,4 +1,4 @@
-"RecID","year","flight_numer","cabin_class","DEPARTURE_AIRPORT","ARRIVAL_AIRPORT","Anzahl Flugsegmente","currencies"
+"RecID","year","flight_number","cabin_class","DEPARTURE_AIRPORT","ARRIVAL_AIRPORT","Anzahl Flugsegmente","currencies"
 1,2020,"LX4425","economy","CGN","ZRH",1,"USD"
 2,2020,"OS420","economy","CDG","VIE",1,"USD"
 3,2020,"OS553","economy","VIE","ZRH",1,"USD"

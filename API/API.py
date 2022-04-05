@@ -5,20 +5,27 @@ import requests
 import csv
 import time
 
+
 tic = time.perf_counter()
 
-def retrieve_IATA(file):
-    payload = ({"flight_iata": file["flight_number"]})
+def retrieve_IATA(airline_iata):
+    params = ({"airline_iata": airline_iata,
+                           'api_key': 'c70f45b0-ed8d-4959-b186-85a3a1871f39'})
 
-    answer = requests.get(
-        "https://airlabs.co/api/v9/flights?",
-        auth=("c70f45b0-ed8d-4959-b186-85a3a1871f39", ""),
-        params=payload,
-    )
+    method = 'ping'
+    api_base = 'http://airlabs.co/api/v9/'
+    answer = requests.get(api_base+method, params)
+
+    print(answer.text)
     
-    print(json.loads(answer.text)["dep_iata"])
-    print(json.loads(answer.text)["arr_iata"])
+    try:
+        dep_code = json.loads(answer.text)["dep_iata"]
+        arr_code = json.loads(answer.text)["arr_iata"]
+    except KeyError:
+        dep_code = None
+        arr_code = None
 
+    return dep_code, arr_code
 
 def retrieve_emissions(origin, destination, cabin_class, currencies):
     data = ({"segments": [{"origin": origin,
@@ -58,8 +65,8 @@ amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(orig
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
 
-amm_test['DEPARTURE_AIRPORT, ARRIVAL_AIRPORT'] = amm_test.apply(lambda x: retrieve_IATA(dep_code=x.DEPARTURE_AIRPORT,
-                                                                  arr_code=x.ARRIVAL_AIRPORT), axis=1)                                                                 
+amm_test['DEPARTURE_AIRPORT, ARRIVAL_AIRPORT'] = amm_test.apply(lambda x: retrieve_IATA(airline_iata=x.flight_number), axis=1)     
+                                                            
 print(amm_test)
 
 amm_test.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test_emissions.csv", index=False)
