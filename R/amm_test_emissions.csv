@@ -1,12 +1,12 @@
-RecID,year,flight_number,cabin_class,DEPARTURE_AIRPORT,ARRIVAL_AIRPORT,Anzahl Flugsegmente,currencies,EMISSIONS_KGCO2EQ
-1,2020,LX4425,economy,CGN,ZRH,1,USD,200.0
-2,2020,OS420,economy,CDG,VIE,1,USD,300.0
-3,2020,OS553,economy,VIE,ZRH,1,USD,200.0
-4,2020,OS763,economy,VIE,VAR,1,USD,300.0
-5,2020,OS764,economy,VAR,VIE,1,USD,300.0
-6,2020,SU2392,economy,,,1,USD,
-7,2020,SU2393,economy,,,1,USD,
-8,2020,LX964,economy,ZRH,BER,1,USD,200.0
-9,2020,LX969,economy,BER,ZRH,1,USD,200.0
-10,2020,DL66,economy,ATL,ZRH,1,USD,1500.0
-11,2020,DL67,economy,ZRH,ATL,1,USD,1500.0
+RecID,year,flight_number,cabin_class,DEPARTURE_AIRPORT,ARRIVAL_AIRPORT,Anzahl Flugsegmente,currencies,EMISSIONS_KGCO2EQ,"DEPARTURE_AIRPORT, ARRIVAL_AIRPORT"
+1,2020,LX4425,economy,CGN,ZRH,1,USD,200.0,"(None, None)"
+2,2020,OS420,economy,CDG,VIE,1,USD,300.0,"(None, None)"
+3,2020,OS553,economy,VIE,ZRH,1,USD,200.0,"(None, None)"
+4,2020,OS763,economy,VIE,VAR,1,USD,300.0,"(None, None)"
+5,2020,OS764,economy,VAR,VIE,1,USD,300.0,"(None, None)"
+6,2020,SU2392,economy,,,1,USD,,"(None, None)"
+7,2020,SU2393,economy,,,1,USD,,"(None, None)"
+8,2020,LX964,economy,ZRH,BER,1,USD,200.0,"(None, None)"
+9,2020,LX969,economy,BER,ZRH,1,USD,200.0,"(None, None)"
+10,2020,DL66,economy,ATL,ZRH,1,USD,1500.0,"(None, None)"
+11,2020,DL67,economy,ZRH,ATL,1,USD,1500.0,"(None, None)"

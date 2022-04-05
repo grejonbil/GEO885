@@ -10,11 +10,13 @@ tic = time.perf_counter()
 
 def retrieve_IATA(airline_iata):
     params = ({"airline_iata": airline_iata,
-                           'api_key': 'c70f45b0-ed8d-4959-b186-85a3a1871f39'})
+                           'api_key': '060c8e8d-b577-46ec-a824-0af6ce08f171'})
 
-    method = 'ping'
-    api_base = 'http://airlabs.co/api/v9/'
-    answer = requests.get(api_base+method, params)
+    answer = requests.get(
+        'http://airlabs.co/api/v9/routes',
+        auth=("060c8e8d-b577-46ec-a824-0af6ce08f171", ""),
+        params=params,
+    )
 
     print(answer.text)
     
