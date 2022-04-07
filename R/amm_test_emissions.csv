@@ -1,4 +1,4 @@
-RecID,year,fn_code,fn_number,cabin_class,DEPARTURE_AIRPORT,ARRIVAL_AIRPORT,Anzahl Flugsegmente,currencies,EMISSIONS_KGCO2EQ,"('DEPARTURE_AIRPORT', 'ARRIVAL_AIRPORT')"
+RecID,year,fn_code,fn_number,cabin_class,DEPARTURE_AIRPORT,ARRIVAL_AIRPORT,Anzahl Flugsegmente,currencies,EMISSIONS_KGCO2EQ,IATA_CODE
 1,2020,LX,4425,economy,CGN,ZRH,1,USD,200.0,"(None, None)"
 2,2020,OS,420,economy,CDG,VIE,1,USD,300.0,"(None, None)"
 3,2020,OS,553,economy,VIE,ZRH,1,USD,200.0,"(None, None)"
