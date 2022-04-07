@@ -1,4 +1,5 @@
 # API
+from curses import ERR
 import json
 import pandas as pd
 import requests
@@ -8,21 +9,25 @@ import time
 
 tic = time.perf_counter()
 
-def retrieve_IATA(airline_iata):
-    params = ({"airline_iata": airline_iata,
-                           'api_key': '060c8e8d-b577-46ec-a824-0af6ce08f171'})
+def retrieve_IATA(FN_IATA, FN):
+    # Key = 32c0d6-dbc517
+    # Key2 = 23bd52-8dbdd9
+    payload = ({"airlineIata":FN_IATA, "flightNumber": FN})
+
+    # https://aviation-edge.com/v2/public/routes?key=23bd52-8dbdd9&airlineIata=LX&flightNumber=15 -> EXAMPLE
 
     answer = requests.get(
-        'http://airlabs.co/api/v9/routes',
-        auth=("060c8e8d-b577-46ec-a824-0af6ce08f171", ""),
-        params=params,
+        'http://aviation-edge.com/v2/public/routes?key=23bd52-8dbdd9',
+        params=payload,
     )
 
     print(answer.text)
-    
     try:
-        dep_code = json.loads(answer.text)["dep_iata"]
-        arr_code = json.loads(answer.text)["arr_iata"]
+        dep_code = json.loads(answer.text)[0]["departureIata"]
+        print(type(dep_code))
+        arr_code = json.loads(answer.text)[0]["arrivalIata"]
+        print(type(arr_code))
+
     except KeyError:
         dep_code = None
         arr_code = None
@@ -67,7 +72,7 @@ amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(orig
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
 
-amm_test['DEPARTURE_AIRPORT, ARRIVAL_AIRPORT'] = amm_test.apply(lambda x: retrieve_IATA(airline_iata=x.flight_number), axis=1)     
+amm_test["IATA_CODE"] = amm_test.apply(lambda x: retrieve_IATA(FN_IATA = x.fn_code, FN=x.fn_number), axis=1)     
                                                             
 print(amm_test)
 

@@ -62,6 +62,10 @@ amm$cabin_class[amm$cabin_class == "P"] <- "premium_economy"
 amm$currencies <- "USD"
 amm <- amm %>% dplyr::select(-c(EMISSIONS_KGCO2EQ, distance))
 
+amm <- amm %>%
+  separate("flight_number", 
+           into = c("fn_code", "fn_number"), 
+           sep = "(?<=[A-Za-z])(?=[0-9])")
 
 amm_test <- amm[1:11,]
 write.csv(amm, file = "amm.csv", row.names=FALSE)
