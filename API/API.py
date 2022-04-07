@@ -73,7 +73,7 @@ amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(orig
                                                                   currencies=x.currencies), axis=1)
 
 amm_test["IATA_CODE"] = amm_test.apply(lambda x: retrieve_IATA(FN_IATA = x.fn_code, FN=x.fn_number), axis=1)     
-                                                            
+                                                                
 print(amm_test)
 
 amm_test.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test_emissions.csv", index=False)
