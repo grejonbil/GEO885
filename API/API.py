@@ -1,11 +1,12 @@
 # API
 from curses import ERR
 import json
+from typing import List
 import pandas as pd
 import requests
 import csv
 import time
-
+import re
 
 tic = time.perf_counter()
 
@@ -24,15 +25,25 @@ def retrieve_IATA(FN_IATA, FN):
     print(answer.text)
     try:
         dep_code = json.loads(answer.text)[0]["departureIata"]
-        print(type(dep_code))
         arr_code = json.loads(answer.text)[0]["arrivalIata"]
-        print(type(arr_code))
 
     except KeyError:
         dep_code = None
         arr_code = None
 
     return dep_code, arr_code
+
+
+def column_change(file):
+    code_list = []
+    code_list = pd.DataFrame(file['IATA_CODE'].tolist()).add_prefix("col")
+
+    # file['IATA_CODE'] = pd.Series(file['IATA_CODE'], dtype="string")
+    # file['IATA_CODE'] = str(file['IATA_CODE']).replace('(','').replace(')','')
+
+    # file["DEPARTURE_AIRPORT_CODE"], file["ARRIVAL_AIRPORT_CODE"] = file['IATA_CODE'].str.split(',', 1).str
+    print(code_list)
+    return code_list
 
 def retrieve_emissions(origin, destination, cabin_class, currencies):
     data = ({"segments": [{"origin": origin,
@@ -67,17 +78,20 @@ def retrieve_emissions(origin, destination, cabin_class, currencies):
 amm_test = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test.csv")
 # amm = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm.csv")
 
-amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
-                                                                  destination=x.ARRIVAL_AIRPORT,
-                                                                  cabin_class=x.cabin_class,
-                                                                  currencies=x.currencies), axis=1)
+amm_test["IATA_CODE"] = amm_test.apply(lambda x: retrieve_IATA(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
 
-amm_test["IATA_CODE"] = amm_test.apply(lambda x: retrieve_IATA(FN_IATA = x.fn_code, FN=x.fn_number), axis=1)     
-                                                                
+column_change(amm_test)
+
+# amm_test['EMISSIONS_KGCO2EQ'] = amm_test.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+#                                                                   destination=x.ARRIVAL_AIRPORT,
+#                                                                   cabin_class=x.cabin_class,
+#                                                                   currencies=x.currencies), axis=1)
+
 print(amm_test)
+
+print(amm_test["IATA_CODE"]. value_counts())
 
 amm_test.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_test_emissions.csv", index=False)
 
 toc = time.perf_counter()
 print(f'- time to calculate: {toc - tic:0.4f} seconds')
-
