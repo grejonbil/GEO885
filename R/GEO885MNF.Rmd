@@ -67,9 +67,11 @@ amm <- amm %>%
            into = c("fn_code", "fn_number"), 
            sep = "(?<=[A-Za-z])(?=[0-9])")
 
-amm_test <- amm[1:11,]
+amm_NONA <- amm[!is.na(amm$fn_code),]
+amm_NONA <- subset(amm_NONA, RecID != 6869)
+
 write.csv(amm, file = "amm.csv", row.names=FALSE)
-write.csv(amm_test, file = "amm_test.csv", row.names=FALSE) # Emissions API geht mit beiden files oben
+write.csv(amm_NONA, file = "amm_NONA.csv", row.names=FALSE) # Emissions API geht mit beiden files oben
 
 ```
 
