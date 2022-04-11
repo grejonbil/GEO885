@@ -20,34 +20,28 @@ library(shiny)
 library(geosphere)
 library(readxl)
 
+# sf::sf_use_s2(FALSE)
+
 ```
 
-```{r}
+```{r Basic data preprocessing}
 airports <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/airports.csv")
 
-amm <- read_excel("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/MNF_amm.xlsx")
+amm_incomplete <- read_excel("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/MNF_amm.xlsx") #Datensatz mit allen Flügen, vollständig und unvollständig
 
 world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/TM_WORLD_BORDERS_SIMPL-0 Kopie")
 
-amm_distance <- amm
-airports_distance <- airports
-
 ```
 
 
-### Data Transformation for emissions-API
+### Data Transformation for emissions-API and flight data (pre processing)
 ```{r}
 airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
 airports <- subset(airports, iata_code != "")
 
-
-airports_distance <- airports_distance %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
-airports_distance <- subset(airports_distance, iata_code != "")
-
-
 airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
 
-amm <- amm %>% rename(flight_number = Flugnummer,
+amm_incomplete <- amm_incomplete %>% rename(flight_number = Flugnummer,
                       DEPARTURE_AIRPORT = Abflug,
                       ARRIVAL_AIRPORT = Destination,
                       EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)",
@@ -55,27 +49,45 @@ amm <- amm %>% rename(flight_number = Flugnummer,
                       currencies = "Kosten (in CHF)",
                       year = Jahr,
                       distance = "Distanz (in km)")
-amm$cabin_class[amm$cabin_class == "Y"] <- "economy"
-amm$cabin_class[amm$cabin_class == "B"] <- "business"
-amm$cabin_class[amm$cabin_class == "F"] <- "first"
-amm$cabin_class[amm$cabin_class == "P"] <- "premium_economy"
-amm$currencies <- "USD"
-amm <- amm %>% dplyr::select(-c(EMISSIONS_KGCO2EQ, distance))
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "Y"] <- "economy"
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "B"] <- "business"
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "F"] <- "first"
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "P"] <- "premium_economy"
+amm_incomplete$currencies <- "USD"
+amm_incomplete <- amm_incomplete %>% dplyr::select(-c(EMISSIONS_KGCO2EQ, distance))
 
-amm <- amm %>%
+amm_incomplete <- amm_incomplete %>%
   separate("flight_number", 
            into = c("fn_code", "fn_number"), 
            sep = "(?<=[A-Za-z])(?=[0-9])")
 
-amm_NONA <- amm[!is.na(amm$fn_code),]
-amm_NONA <- subset(amm_NONA, RecID != 6869)
+amm_incomplete <- subset(amm_incomplete, RecID != 6869)
 
-write.csv(amm, file = "amm.csv", row.names=FALSE)
-write.csv(amm_NONA, file = "amm_NONA.csv", row.names=FALSE) # Emissions API geht mit beiden files oben
+write.csv(amm_incomplete, file = "amm_incomplete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
 
 ```
 
-``` {r}
+```{r Data preparation}
+airports_distance <- airports
+
+airports_distance <- airports_distance %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
+airports_distance <- subset(airports_distance, iata_code != "")
+
+```
+
+
+```{r Subset}
+amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv")
+# Alle Flugdaten mit "MISSING" values
+
+amm_distance <- amm
+
+
+
+```
+
+### Link locations with coordinates
+``` {r} 
 amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
                       dep_country = iso_country)
@@ -86,15 +98,14 @@ amm <- amm %>% rename(dep_coordinates = coordinates,
 amm <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm <- amm %>% rename(arr_coordinates = coordinates,
                       arr_country = iso_country)
-amm <- amm %>% mutate(EMISSIONS_KGCO2EQ = (EMISSIONS_KGCO2EQ * 1000))
 
 drop <- c("id.x", "id.y")
 amm = amm[,!(names(amm) %in% drop)]
 ```
 
 ```{r Distances}
-amm_distance <- left_join(amm_distance,airports_distance, by = c("Abflug" = "iata_code"))
-amm_distance <- left_join(amm_distance, airports_distance, by = c("Destination" = "iata_code"))
+amm_distance <- left_join(amm_distance,airports_distance, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm_distance <- left_join(amm_distance, airports_distance, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 
 amm_distance <- amm_distance %>% rename(dep_lon = longitude_deg.x,
                                         dep_lat = latitude_deg.x,
@@ -108,21 +119,21 @@ amm_distance <- amm_distance %>% rowwise() %>%
 view(amm_distance)
 view(airports_distance)
 
-amm_distance_count <- amm_distance %>% group_by(Jahr) %>% summarize(distance_sum = sum(distance_km, na.rm=TRUE))
+amm_distance_count <- amm_distance %>% group_by(year) %>% summarize(distance_sum = sum(distance_km, na.rm=TRUE))
 
-ggplot(amm_distance_count, aes(x=Jahr, y = distance_sum))+
+ggplot(amm_distance_count, aes(x=year, y = distance_sum))+
   geom_line()
 
-ggplot(amm_distance, aes(factor(Jahr), distance_km, col = cabin_class))+ 
+ggplot(amm_distance, aes(factor(year), distance_km, col = cabin_class))+ 
   geom_point(size = .5)
 
 
-amm_emissions_byyear <- amm %>% group_by(Jahr) %>% summarize(emissions_sum_kg = sum(EMISSIONS_KGCO2EQ, na.rm=TRUE))
+amm_emissions_byyear <- amm %>% group_by(year) %>% summarize(emissions_sum_kg = sum(EMISSIONS_KGCO2EQ, na.rm=TRUE))
 
-ggplot(amm_emissions_byyear, aes(x=Jahr, y = emissions_sum_kg))+
+ggplot(amm_emissions_byyear, aes(x=year, y = emissions_sum_kg))+
   geom_line()
 
-ggplot(amm, aes(factor(Jahr), EMISSIONS_KGCO2EQ, col = cabin_class))+ 
+ggplot(amm, aes(factor(year), EMISSIONS_KGCO2EQ, col = cabin_class))+ 
   geom_point(size = .5)
 ```
 
@@ -174,7 +185,7 @@ ggplot() +
 ```
 
 ```{r}
-average_co2_18_20 <- amm %>% group_by(Jahr) %>% summarize(mean = mean(EMISSIONS_KGCO2EQ, na.rm=TRUE))
+average_co2_18_20 <- amm %>% group_by(year) %>% summarize(mean = mean(EMISSIONS_KGCO2EQ, na.rm=TRUE))
 baseline_co2 <- mean(average_co2_18_20$mean)
 
 ```
@@ -186,7 +197,7 @@ target_period <- c(2022, 2030)
 full_period <- c(2018:2030)
 
 aggregated_uzh <- amm %>% 
-  group_by(Jahr) %>% 
+  group_by(year) %>% 
   summarise(total_emission = sum(EMISSIONS_KGCO2EQ, na.rm=TRUE)) %>%
   mutate(total_emission_3y_mean = slide_dbl(total_emission, mean, 
                                             .before = 1, .after = 1,
