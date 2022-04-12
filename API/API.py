@@ -83,19 +83,24 @@ def retrieve_emissions(origin, destination, cabin_class, currencies):
 amm = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_incomplete.csv")
 
 amm["IATA_CODE_DEP"] = amm.apply(lambda x: retrieve_IATA_dep(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
+amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+
 
 amm["IATA_CODE_ARR"] = amm.apply(lambda x: retrieve_IATA_arr(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
+amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+
 
 column_change(amm) #Transfers all values from the API column to the missing NA values in the columns DEPARTURE_AIRPORT and ARRIVAL_AIRPORT
+amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+
 
 amm['EMISSIONS_KGCO2EQ'] = amm.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
                                                                   destination=x.ARRIVAL_AIRPORT,
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
 
-print(amm)
-
 amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+print(amm)
 
 toc = time.perf_counter()
 print(f'- time to calculate: {toc - tic:0.4f} seconds')
