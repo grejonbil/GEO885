@@ -19,6 +19,9 @@ library(sf)
 library(shiny)
 library(geosphere)
 library(readxl)
+library(slider)
+library(scales)
+library(wesanderson)
 
 # sf::sf_use_s2(FALSE)
 
@@ -38,6 +41,8 @@ world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885
 ```{r}
 airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
 airports <- subset(airports, iata_code != "")
+
+airports_distance <- airports
 
 airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
 
@@ -67,23 +72,16 @@ write.csv(amm_incomplete, file = "amm_incomplete.csv", row.names=FALSE) # Emissi
 
 ```
 
-```{r Data preparation}
-airports_distance <- airports
-
-airports_distance <- airports_distance %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
-airports_distance <- subset(airports_distance, iata_code != "")
-
-```
-
-
 ```{r Subset}
 amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv")
 # Alle Flugdaten mit "MISSING" values
+amm <- subset(amm, select = -c(IATA_CODE_DEP))
+amm <- subset(amm, select = -c(IATA_CODE_ARR))
+
+amm$EMISSIONS_KGCO2EQ <- as.numeric(amm$EMISSIONS_KGCO2EQ)
+amm <- amm %>% drop_na(EMISSIONS_KGCO2EQ)
 
 amm_distance <- amm
-
-
-
 ```
 
 ### Link locations with coordinates
@@ -116,25 +114,34 @@ amm_distance <- amm_distance %>% rowwise() %>%
     mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
                                   c(arr_lon, arr_lat)))/1000)
 
-view(amm_distance)
-view(airports_distance)
+emissions_per_class <- amm %>%
+  group_by(year, cabin_class) %>%
+  summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
 
-amm_distance_count <- amm_distance %>% group_by(year) %>% summarize(distance_sum = sum(distance_km, na.rm=TRUE))
+aggregated_distance <- amm_distance %>% 
+  group_by(year) %>% 
+  summarise(total_distance = sum(distance_km))
+max_distance <- max(aggregated_distance$total_distance) 
 
-ggplot(amm_distance_count, aes(x=year, y = distance_sum))+
-  geom_line()
+red <- wes_palette("Darjeeling1")[1]
+green <- wes_palette("Darjeeling1")[2]
+orange <- wes_palette("Darjeeling1")[3]
+blue <- wes_palette("Darjeeling1")[5]
+dark_orange <- wes_palette("Darjeeling1")[4]
+black <- wes_palette("Darjeeling2")[5]
 
-ggplot(amm_distance, aes(factor(year), distance_km, col = cabin_class))+ 
-  geom_point(size = .5)
+ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_manual(values=c(blue, dark_orange,green,black, orange, red), 
+                      name = "Reason for travel") +
+    ggtitle("Reasons for air travel at GIUZ (2017-2020)") +
+    xlab("") +
+    ylab("km") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
 
-
-amm_emissions_byyear <- amm %>% group_by(year) %>% summarize(emissions_sum_kg = sum(EMISSIONS_KGCO2EQ, na.rm=TRUE))
-
-ggplot(amm_emissions_byyear, aes(x=year, y = emissions_sum_kg))+
-  geom_line()
-
-ggplot(amm, aes(factor(year), EMISSIONS_KGCO2EQ, col = cabin_class))+ 
-  geom_point(size = .5)
 ```
 
 ```{r}
@@ -151,7 +158,6 @@ amm_arr <- st_as_sf(amm_arr)
 
 flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
 flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
-view(flightmap_sort)
 
 # create map
 ggplot() +
@@ -167,21 +173,7 @@ ggplot() +
 ```
 
 ```{r Flightpath}
-flightpath <- cbind(amm$DEPARTURE_AIRPORT,
-                     amm$ARRIVAL_AIRPORT) %>% as.data.frame()
-flightpath <- flightpath %>% rename(Departure = V1,
-                                    Arrival = V2)
-flightpath <- subset(flightpath, Departure != "" & Arrival != "")
 
-plot_flights(flightpath)
-
-lines <- amm %>% rowwise() %>% gcIntermediate(dep_coordinates, arr_coordinates, n=50)
-
-ggplot() +
-  geom_sf(data=world, lwd = .5)+
-  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates")) +
-  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates")) +
-  geom_line(lines)
 ```
 
 ```{r}
@@ -204,7 +196,7 @@ aggregated_uzh <- amm %>%
                                             .complete = T)) 
 # UZH: only 2018 and 2019
 uzh_baseline_co2 <- aggregated_uzh %>%
-  filter(Jahr %in% reference_period[]) %>%
+  filter(year %in% reference_period[]) %>%
   summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
   pull(mean)
 
@@ -214,7 +206,7 @@ perc_2030 <- 0.6 - ((0.6 - 0.47) * (2030 - 2025) / (2030 -2022))
 
 uzh_target_co2 <- data.frame(x=target_period,
                              y=c(uzh_baseline_co2 * 0.60, 
-                                 uzh_baseline_co2 * perc_2025)) 
+                                 uzh_baseline_co2 * perc_2030)) 
 
 max_co2 <- max(aggregated_uzh$total_emission) 
 
