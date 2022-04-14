@@ -82,6 +82,7 @@ amm$EMISSIONS_KGCO2EQ <- as.numeric(amm$EMISSIONS_KGCO2EQ)
 amm <- amm %>% drop_na(EMISSIONS_KGCO2EQ)
 
 amm_distance <- amm
+(nrow(amm)/nrow(amm_incomplete))*100
 ```
 
 ### Link locations with coordinates
