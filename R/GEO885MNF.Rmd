@@ -124,6 +124,7 @@ aggregated_distance <- amm_distance %>%
   summarise(total_distance = sum(distance_km))
 max_distance <- max(aggregated_distance$total_distance) 
 
+
 red <- wes_palette("Darjeeling1")[1]
 green <- wes_palette("Darjeeling1")[2]
 orange <- wes_palette("Darjeeling1")[3]
@@ -131,18 +132,20 @@ blue <- wes_palette("Darjeeling1")[5]
 dark_orange <- wes_palette("Darjeeling1")[4]
 black <- wes_palette("Darjeeling2")[5]
 
-ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(values=c(blue, dark_orange,green,black, orange, red), 
-                      name = "Reason for travel") +
-    ggtitle("Reasons for air travel at GIUZ (2017-2020)") +
+    scale_fill_discrete(name = "Reason for travel")+
+    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
     xlab("") +
-    ylab("km") +
+    ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
     theme_bw() + 
     theme(legend.position = c(0.86, 0.7))
 
+ggsave(file="flight_distance.png", eco2,
+       width = 10,
+       height= 7)
 ```
 
 ```{r}
