@@ -186,9 +186,17 @@ ggplot() +
 ```
 
 ```{r}
-average_co2_18_20 <- amm %>% group_by(year) %>% summarize(mean = mean(EMISSIONS_KGCO2EQ, na.rm=TRUE))
-baseline_co2 <- mean(average_co2_18_20$mean)
+cc_count_in <- amm_incomplete %>%
+  group_by(cabin_class) %>%
+  summarise(cnt = n()) %>%
+  mutate(freq = round(cnt / sum(cnt), 2)) %>% 
+  arrange(desc(freq))
 
+cc_count_com <- amm %>%
+  group_by(cabin_class) %>%
+  summarise(cnt = n()) %>%
+  mutate(freq = round(cnt / sum(cnt), 2)) %>% 
+  arrange(desc(freq))
 ```
 
 
