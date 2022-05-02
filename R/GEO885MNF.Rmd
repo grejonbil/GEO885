@@ -42,9 +42,7 @@ world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885
 airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
 airports <- subset(airports, iata_code != "")
 
-airports_distance <- airports
-
-airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326) %>% rename(coordinates = geometry)
+airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326, remove = FALSE) %>% rename(coordinates = geometry)
 
 amm_incomplete <- amm_incomplete %>% rename(flight_number = Flugnummer,
                       DEPARTURE_AIRPORT = Abflug,
@@ -103,8 +101,8 @@ amm = amm[,!(names(amm) %in% drop)]
 ```
 
 ```{r Distances}
-amm_distance <- left_join(amm_distance,airports_distance, by = c("DEPARTURE_AIRPORT" = "iata_code"))
-amm_distance <- left_join(amm_distance, airports_distance, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_distance <- left_join(amm_distance,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm_distance <- left_join(amm_distance, airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 
 amm_distance <- amm_distance %>% rename(dep_lon = longitude_deg.x,
                                         dep_lat = latitude_deg.x,
