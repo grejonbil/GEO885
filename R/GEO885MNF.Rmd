@@ -153,8 +153,13 @@ arrdep <- ggplot() +
   geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = 1, shape = 23) +
   geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = 1, shape = 23) +
   ggtitle("Departure and arrival locations for all GIUZ flights separated by symbols")+
-  xlab("Longitude") + ylab("Latitude")
+  xlab("Longitude") + ylab("Latitude")+
+  scale_color_manual(labels = c("Arrival", "Departure"),
+                     values = c("red", "blue"))+
+  labs(colour = "Flight path")+
+  theme(legend.position = "none")
 
+arrdep
 ggsave(file="flight_locations.png", arrdep,
        width = 10,
        height= 7)
@@ -162,7 +167,7 @@ ggsave(file="flight_locations.png", arrdep,
 
 ```{r}
 amm_arr <- st_as_sf(amm_arr)
-
+# sf::sf_use_s2(FALSE)
 flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
 flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
 
@@ -180,6 +185,9 @@ ggplot() +
 ```
 
 ```{r Flightpath}
+flightpath_df <- amm %>% select(c("DEPARTURE_AIRPORT", "ARRIVAL_AIRPORT"))
+
+flightpath <- plot_flights(flightpath_df)
 
 ```
 
