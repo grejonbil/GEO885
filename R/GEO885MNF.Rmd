@@ -22,23 +22,28 @@ library(readxl)
 library(slider)
 library(scales)
 library(wesanderson)
+library(here)
 
 # sf::sf_use_s2(FALSE)
+
+dataFolder   <- here::here()   
+RFolder      <- here::here()         
+figureFolder <- here::here("figs") 
 
 ```
 
 ```{r Basic data preprocessing}
-airports <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/GIUZ_AirTravel_20210509/airports.csv")
+airports <- read.csv(file.path(dataFolder, "airports.csv"))
 
-amm_incomplete <- read_excel("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/MNF_amm.xlsx") #Datensatz mit allen Flügen, vollständig und unvollständig
+amm_incomplete <- read_excel(file.path(dataFolder, "MNF_amm.xlsx")) #Datensatz mit allen Flügen, vollständig und unvollständig
 
-world <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/Data and Code/TM_WORLD_BORDERS_SIMPL-0 Kopie")
+world <- st_read(file.path(dataFolder, "TM_WORLD_BORDERS_SIMPL-0 Kopie"))
 
 ```
 
 
 ### Data Transformation for emissions-API and flight data (pre processing)
-```{r}
+#```{r}
 airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, elevation_ft, municipality, scheduled_service, type, keywords, name, ident, iso_region, gps_code,local_code))
 airports <- subset(airports, iata_code != "")
 
@@ -68,13 +73,29 @@ amm_incomplete <- subset(amm_incomplete, RecID != 6869)
 
 write.csv(amm_incomplete, file = "amm_incomplete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
 
-```
+#```
 
 ```{r Subset}
-amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv")
+amm <- read.csv(file.path(dataFolder, "amm_complete.csv"))
+
 # Alle Flugdaten mit "MISSING" values
 amm <- subset(amm, select = -c(IATA_CODE_DEP))
 amm <- subset(amm, select = -c(IATA_CODE_ARR))
+
+amm_business <- amm
+amm_business <- subset(amm_business, select = -c(EMISSIONS_KGCO2EQ))
+amm_business$cabin_class[amm_business$cabin_class == "economy"] <- "business"
+amm_business$cabin_class[amm_business$cabin_class == "premium_economy"] <- "business"
+amm_business$cabin_class[amm_business$cabin_class == "first"] <- "business"
+
+amm_economy <- amm
+amm_economy <- subset(amm_economy, select = -c(EMISSIONS_KGCO2EQ))
+amm_economy$cabin_class[amm_economy$cabin_class == "business"] <- "economy"
+amm_economy$cabin_class[amm_economy$cabin_class == "premium_economy"] <- "economy"
+amm_economy$cabin_class[amm_economy$cabin_class == "first"] <- "economy"
+
+write.csv(amm_business, file = "amm_business.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+write.csv(amm_economy, file = "amm_economy.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
 
 amm$EMISSIONS_KGCO2EQ <- as.numeric(amm$EMISSIONS_KGCO2EQ)
 amm <- amm %>% drop_na(EMISSIONS_KGCO2EQ)
@@ -87,7 +108,7 @@ amm_distance <- amm
 ``` {r} 
 amm_arr <- left_join(amm,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
 amm_arr <- amm_arr %>% rename(arr_coordinates = coordinates,
-                      dep_country = iso_country)
+                      arr_country = iso_country)
 
 amm <- left_join(amm,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
 amm <- amm %>% rename(dep_coordinates = coordinates,
@@ -150,8 +171,8 @@ ggsave(file="flight_class.png", eco2,
 ```{r}
 arrdep <- ggplot() +
   geom_sf(data=world)+
-  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = 1, shape = 23) +
-  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = 1, shape = 23) +
+  geom_sf(data = amm, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = .5, shape = 23) +
+  geom_sf(data = amm, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = .5, shape = 23) +
   ggtitle("Departure and arrival locations for all GIUZ flights separated by symbols")+
   xlab("Longitude") + ylab("Latitude")+
   scale_color_manual(labels = c("Arrival", "Departure"),
@@ -181,14 +202,25 @@ ggplot() +
   ggtitle("Arrival locations for all GIUZ flights counnted by country")+
   xlab("Longitude") + ylab("Latitude")+
   theme(legend.position = "none")
+```
+
+Subset all the flights that are entirely in Europa using the world- df and the amm- dataframe and crosslinking it bei ISO2 codes. 
+
+```{r}
+EUISO2 <- read.csv(file.path(dataFolder, "EuroAlpha2-Codes.csv"), sep = ";") 
+EUISO2$X <- NULL
+```
+
+Create subset from world-df using the EUISO2-df and select all only European flights.
+```{r}
 
 ```
 
+
 ```{r Flightpath}
-flightpath_df <- amm %>% select(c("DEPARTURE_AIRPORT", "ARRIVAL_AIRPORT"))
-
-flightpath <- plot_flights(flightpath_df)
-
+# flightpath_df <- amm %>% select(c("DEPARTURE_AIRPORT", "ARRIVAL_AIRPORT"))
+# 
+# flightpath <- plot_flights(flightpath_df)
 ```
 
 ```{r}
