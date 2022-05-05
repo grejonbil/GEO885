@@ -5,51 +5,52 @@ import requests
 import time
 
 tic = time.perf_counter()
+print("Start code")
     # Key = 32c0d6-dbc517
     # Key2 = 23bd52-8dbdd9 -> Used in this code
 
-def retrieve_IATA_dep(FN_IATA, FN):
-    global dep_code_iata
-    payload = ({"airlineIata":FN_IATA, "flightNumber": FN})
-    answer = requests.get(
-        'http://aviation-edge.com/v2/public/routes?key=23bd52-8dbdd9',
-        params=payload)
+# def retrieve_IATA_dep(FN_IATA, FN):
+#     global dep_code_iata
+#     payload = ({"airlineIata":FN_IATA, "flightNumber": FN})
+#     answer = requests.get(
+#         'http://aviation-edge.com/v2/public/routes?key=23bd52-8dbdd9',
+#         params=payload)
 
-    print(answer.text)
-    try:
-        dep_code_iata = json.loads(answer.text)[0]["departureIata"]
+#     print(answer.text)
+#     try:
+#         dep_code_iata = json.loads(answer.text)[0]["departureIata"]
 
-    except json.JSONDecodeError:
-        print("Error decoding JSON")
+#     except json.JSONDecodeError:
+#         print("Error decoding JSON")
 
-    except KeyError:
-        dep_code_iata = "MISSING"
+#     except KeyError:
+#         dep_code_iata = "MISSING"
 
-    return dep_code_iata
+#     return dep_code_iata
 
-def retrieve_IATA_arr(FN_IATA, FN):
-    global arr_code_iata
-    payload = ({"airlineIata":FN_IATA, "flightNumber": FN})
-    answer = requests.get(
-        'http://aviation-edge.com/v2/public/routes?key=23bd52-8dbdd9',
-        params=payload)
+# def retrieve_IATA_arr(FN_IATA, FN):
+#     global arr_code_iata
+#     payload = ({"airlineIata":FN_IATA, "flightNumber": FN})
+#     answer = requests.get(
+#         'http://aviation-edge.com/v2/public/routes?key=23bd52-8dbdd9',
+#         params=payload)
 
-    print(answer.text)
-    try:
-        arr_code_iata = json.loads(answer.text)[0]["arrivalIata"]
+#     print(answer.text)
+#     try:
+#         arr_code_iata = json.loads(answer.text)[0]["arrivalIata"]
     
-    except json.JSONDecodeError:
-        print("Error decoding JSON")
+#     except json.JSONDecodeError:
+#         print("Error decoding JSON")
 
-    except KeyError:
-        arr_code_iata = "MISSING"
+#     except KeyError:
+#         arr_code_iata = "MISSING"
 
-    return arr_code_iata
+#     return arr_code_iata
 
-def column_change(file):
-    file.DEPARTURE_AIRPORT.fillna(file.IATA_CODE_DEP,inplace=True)
-    file.ARRIVAL_AIRPORT.fillna(file.IATA_CODE_ARR,inplace=True)
-    return 
+# def column_change(file):
+#     file.DEPARTURE_AIRPORT.fillna(file.IATA_CODE_DEP,inplace=True)
+#     file.ARRIVAL_AIRPORT.fillna(file.IATA_CODE_ARR,inplace=True)
+#     return 
 
 def retrieve_emissions(origin, destination, cabin_class, currencies):
     data = ({"segments": [{"origin": origin,
@@ -80,27 +81,41 @@ def retrieve_emissions(origin, destination, cabin_class, currencies):
 
     return footprint
 
-amm = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_incomplete.csv")
-
-amm["IATA_CODE_DEP"] = amm.apply(lambda x: retrieve_IATA_dep(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
-amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
-
-
-amm["IATA_CODE_ARR"] = amm.apply(lambda x: retrieve_IATA_arr(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
-amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+# amm = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_incomplete.csv")
+amm_business = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business.csv")
+amm_economy = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy.csv")
 
 
-column_change(amm) #Transfers all values from the API column to the missing NA values in the columns DEPARTURE_AIRPORT and ARRIVAL_AIRPORT
-amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+# amm["IATA_CODE_DEP"] = amm.apply(lambda x: retrieve_IATA_dep(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
+# amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+
+# amm["IATA_CODE_ARR"] = amm.apply(lambda x: retrieve_IATA_arr(FN_IATA = x.fn_code, FN=x.fn_number), axis=1) 
+# amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
 
 
-amm['EMISSIONS_KGCO2EQ'] = amm.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+# column_change(amm) #Transfers all values from the API column to the missing NA values in the columns DEPARTURE_AIRPORT and ARRIVAL_AIRPORT
+# amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+
+
+# amm['EMISSIONS_KGCO2EQ'] = amm.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+#                                                                   destination=x.ARRIVAL_AIRPORT,
+#                                                                   cabin_class=x.cabin_class,
+#                                                                   currencies=x.currencies), axis=1)
+
+amm_business['EMISSIONS_KGCO2EQ'] = amm_business.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
                                                                   destination=x.ARRIVAL_AIRPORT,
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
 
-amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
-print(amm)
+amm_economy['EMISSIONS_KGCO2EQ'] = amm_economy.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+                                                                  destination=x.ARRIVAL_AIRPORT,
+                                                                  cabin_class=x.cabin_class,
+                                                                  currencies=x.currencies), axis=1)
+
+#amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
+
+amm_business.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business.csv", index=False)
+amm_economy.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy.csv", index=False)
 
 toc = time.perf_counter()
 print(f'- time to calculate: {toc - tic:0.4f} seconds')
