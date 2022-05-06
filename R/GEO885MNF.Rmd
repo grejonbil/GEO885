@@ -229,13 +229,36 @@ ggplot() +
 Subset all the flights that are entirely in Europa using the world- df and the amm- dataframe and crosslinking it bei ISO2 codes. 
 
 ```{r}
+#ISO2 form european countries
 EUISO2 <- read.csv(file.path(dataFolder, "EuroAlpha2-Codes.csv"), sep = ";") 
 EUISO2$X <- NULL
+EUISO2$ï..Name<-gsub("Â","",as.character(EUISO2$ï..Name)) 
+names(EUISO2)[1] <- "Name"
+
+
+#subset of european countries from world df
+europe<- left_join(EUISO2, world)
+europe$Name <- NULL
+europe_ohne_RU <-subset(europe, ISO2!= "RU")
+#just european flights arrival and departure 
+europe_arr <- amm[which(amm$arr_country %in% unique(EUISO2$ISO2)),]
+europe_dep <- amm[which(amm$dep_country %in% unique(EUISO2$ISO2)),]
+
+
 ```
 
 Create subset from world-df using the EUISO2-df and select all only European flights.
 ```{r}
-
+arrdep_europe <-ggplot() +
+  geom_sf(data=europe_ohne_RU, aes(geometry = geometry))+
+  geom_sf(data = europe_dep, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = .5, shape = 23) +
+  geom_sf(data = europe_arr, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = .5, shape = 23) +
+  ggtitle("Departure and arrival locations for all european flights separated by symbols")+ xlab("Longitude") + ylab("Latitude")+
+  scale_color_manual(labels = c("Arrival", "Departure"),
+                     values = c("red", "blue"))+
+  labs(colour = "Flight path")+
+  theme(legend.position = "none")
+arrdep_europe
 ```
 
 
