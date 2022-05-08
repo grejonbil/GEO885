@@ -95,8 +95,8 @@ amm_economy$cabin_class[amm_economy$cabin_class == "business"] <- "economy"
 amm_economy$cabin_class[amm_economy$cabin_class == "premium_economy"] <- "economy"
 amm_economy$cabin_class[amm_economy$cabin_class == "first"] <- "economy"
 
-write.csv(amm_business, file = "amm_business.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
-write.csv(amm_economy, file = "amm_economy.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+# write.csv(amm_business, file = "amm_business.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+# write.csv(amm_economy, file = "amm_economy.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
 
 amm$EMISSIONS_KGCO2EQ <- as.numeric(amm$EMISSIONS_KGCO2EQ)
 amm <- amm %>% drop_na(EMISSIONS_KGCO2EQ)

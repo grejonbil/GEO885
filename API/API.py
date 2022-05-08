@@ -114,8 +114,8 @@ amm_economy['EMISSIONS_KGCO2EQ'] = amm_economy.apply(lambda x: retrieve_emission
 
 #amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
 
-amm_business.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business.csv", index=False)
-amm_economy.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy.csv", index=False)
+amm_business.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business_complete.csv", index=False)
+amm_economy.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy_complete.csv", index=False)
 
 toc = time.perf_counter()
 print(f'- time to calculate: {toc - tic:0.4f} seconds')
