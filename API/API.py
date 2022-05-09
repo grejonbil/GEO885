@@ -76,6 +76,7 @@ def retrieve_emissions(origin, destination, cabin_class, currencies):
     # I added the exception here for flights with NA origin or destination, for which footprint is of course undefined
     try:
         footprint = json.loads(response.text)["footprint"]
+        print(footprint)
     except KeyError:
         footprint = "MISSING"
 
@@ -102,10 +103,10 @@ amm_economy = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semest
 #                                                                   cabin_class=x.cabin_class,
 #                                                                   currencies=x.currencies), axis=1)
 
-amm_business['EMISSIONS_KGCO2EQ'] = amm_business.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
-                                                                  destination=x.ARRIVAL_AIRPORT,
-                                                                  cabin_class=x.cabin_class,
-                                                                  currencies=x.currencies), axis=1)
+# amm_business['EMISSIONS_KGCO2EQ'] = amm_business.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
+#                                                                   destination=x.ARRIVAL_AIRPORT,
+#                                                                   cabin_class=x.cabin_class,
+#                                                                   currencies=x.currencies), axis=1)
 
 amm_economy['EMISSIONS_KGCO2EQ'] = amm_economy.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
                                                                   destination=x.ARRIVAL_AIRPORT,
@@ -114,8 +115,9 @@ amm_economy['EMISSIONS_KGCO2EQ'] = amm_economy.apply(lambda x: retrieve_emission
 
 #amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
 
-amm_business.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business_complete.csv", index=False)
+# amm_business.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business_complete.csv", index=False)
 amm_economy.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy_complete.csv", index=False)
 
 toc = time.perf_counter()
 print(f'- time to calculate: {toc - tic:0.4f} seconds')
+print("Code End")
