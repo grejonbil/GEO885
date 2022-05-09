@@ -23,6 +23,8 @@ library(slider)
 library(scales)
 library(wesanderson)
 library(here)
+library(maps)
+
 
 # sf::sf_use_s2(FALSE)
 
@@ -31,6 +33,16 @@ RFolder      <- here::here()
 figureFolder <- here::here("figs") 
 
 ```
+
+```{r Colors}
+red <- wes_palette("Darjeeling1")[1]
+green <- wes_palette("Darjeeling1")[2]
+orange <- wes_palette("Darjeeling1")[3]
+blue <- wes_palette("Darjeeling1")[5]
+dark_orange <- wes_palette("Darjeeling1")[4]
+black <- wes_palette("Darjeeling2")[5]
+```
+
 
 ```{r Basic data preprocessing}
 airports <- read.csv(file.path(dataFolder, "airports.csv"))
@@ -49,31 +61,6 @@ airports <- airports %>% dplyr::select(-c(continent, home_link, wikipedia_link, 
 airports <- subset(airports, iata_code != "")
 
 airports <- airports %>% st_as_sf(coords = c("longitude_deg", "latitude_deg"), crs = 4326, remove = FALSE) %>% rename(coordinates = geometry)
-
-amm_incomplete <- amm_incomplete %>% rename(flight_number = Flugnummer,
-                      DEPARTURE_AIRPORT = Abflug,
-                      ARRIVAL_AIRPORT = Destination,
-                      EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)",
-                      cabin_class = Serviceklasse,
-                      currencies = "Kosten (in CHF)",
-                      year = Jahr,
-                      distance = "Distanz (in km)")
-amm_incomplete$cabin_class[amm_incomplete$cabin_class == "Y"] <- "economy"
-amm_incomplete$cabin_class[amm_incomplete$cabin_class == "B"] <- "business"
-amm_incomplete$cabin_class[amm_incomplete$cabin_class == "F"] <- "first"
-amm_incomplete$cabin_class[amm_incomplete$cabin_class == "P"] <- "premium_economy"
-amm_incomplete$currencies <- "USD"
-amm_incomplete <- amm_incomplete %>% dplyr::select(-c(EMISSIONS_KGCO2EQ, distance))
-
-amm_incomplete <- amm_incomplete %>%
-  separate("flight_number", 
-           into = c("fn_code", "fn_number"), 
-           sep = "(?<=[A-Za-z])(?=[0-9])")
-
-amm_incomplete <- subset(amm_incomplete, RecID != 6869)
-
-write.csv(amm_incomplete, file = "amm_incomplete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
-
 ```
 
 ```{r Subset}
@@ -83,26 +70,10 @@ amm <- read.csv(file.path(dataFolder, "amm_complete.csv"))
 amm <- subset(amm, select = -c(IATA_CODE_DEP))
 amm <- subset(amm, select = -c(IATA_CODE_ARR))
 
-amm_business <- amm
-amm_business <- subset(amm_business, select = -c(EMISSIONS_KGCO2EQ))
-amm_business$cabin_class[amm_business$cabin_class == "economy"] <- "business"
-amm_business$cabin_class[amm_business$cabin_class == "premium_economy"] <- "business"
-amm_business$cabin_class[amm_business$cabin_class == "first"] <- "business"
-
-amm_economy <- amm
-amm_economy <- subset(amm_economy, select = -c(EMISSIONS_KGCO2EQ))
-amm_economy$cabin_class[amm_economy$cabin_class == "business"] <- "economy"
-amm_economy$cabin_class[amm_economy$cabin_class == "premium_economy"] <- "economy"
-amm_economy$cabin_class[amm_economy$cabin_class == "first"] <- "economy"
-
-# write.csv(amm_business, file = "amm_business.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
-# write.csv(amm_economy, file = "amm_economy.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
-
 amm$EMISSIONS_KGCO2EQ <- as.numeric(amm$EMISSIONS_KGCO2EQ)
 amm <- amm %>% drop_na(EMISSIONS_KGCO2EQ)
 
-amm_distance <- amm
-(nrow(amm)/nrow(amm_incomplete))*100
+paste("Completeness of dataset", (nrow(amm)/nrow(amm_incomplete))*100,"%")
 ```
 
 ### Link locations with coordinates
@@ -123,15 +94,12 @@ amm = amm[,!(names(amm) %in% drop)]
 ```
 
 ```{r Distances}
-amm_distance <- left_join(amm_distance,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
-amm_distance <- left_join(amm_distance, airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
-
-amm_distance <- amm_distance %>% rename(dep_lon = longitude_deg.x,
+amm <- amm %>% rename(dep_lon = longitude_deg.x,
                                         dep_lat = latitude_deg.x,
                                         arr_lon = longitude_deg.y,
                                         arr_lat = latitude_deg.y)
 
-amm_distance <- amm_distance %>% rowwise() %>% 
+amm <- amm %>% rowwise() %>% 
     mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
                                   c(arr_lon, arr_lat)))/1000)
 
@@ -139,34 +107,10 @@ emissions_per_class <- amm %>%
   group_by(year, cabin_class) %>%
   summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
 
-aggregated_distance <- amm_distance %>% 
+aggregated_distance <- amm %>% 
   group_by(year) %>% 
   summarise(total_distance = sum(distance_km))
 max_distance <- max(aggregated_distance$total_distance) 
-
-
-red <- wes_palette("Darjeeling1")[1]
-green <- wes_palette("Darjeeling1")[2]
-orange <- wes_palette("Darjeeling1")[3]
-blue <- wes_palette("Darjeeling1")[5]
-dark_orange <- wes_palette("Darjeeling1")[4]
-black <- wes_palette("Darjeeling2")[5]
-
-eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
-    geom_bar(position="stack", stat="identity") +
-    scale_fill_discrete(name = "Reason for travel")+
-    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
-    xlab("") +
-    ylab("emissions [kgCO2]") +
-    scale_y_continuous(label=comma,
-                       limits=c(0,max_distance*1.02)) +
-    theme_bw() + 
-    theme(legend.position = c(0.86, 0.7))
-eco2
-
-ggsave(file="flight_class.png", eco2,
-       width = 10,
-       height= 7)
 ```
 
 ```{r}
@@ -192,15 +136,14 @@ ggsave(file="flight_locations.png", arrdep,
 #https://www.gis-blog.com/flight-connection-map-with-r/
 
 ZRH <- filter(amm, DEPARTURE_AIRPORT!="ZRH") 
-library(maps)
 #create basemap
 map("world", fill=T, col="grey8", bg="grey15")
 #overlay airports
-points(amm$longitude_deg.x, amm$latitude_deg.x, pch=3, cex=0.1, col="chocolate1")+
-points(amm$longitude_deg.y, amm$latitude_deg.y, pch=3, cex=0.1, col="chocolate1")
+points(amm$dep_lon, amm$dep_lat, pch=3, cex=0.1, col="chocolate1")+
+points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.1, col="chocolate1")
 
 for (i in (1:dim(amm)[1])) { 
-inter <- gcIntermediate(c(ZRH$longitude_deg.x[1], ZRH$latitude_deg.x[1]), c(amm$longitude_deg.y[i], amm$latitude_deg.y[i]), n=200)
+inter <- gcIntermediate(c(ZRH$dep_lon[1], ZRH$dep_lat[1]), c(amm$arr_lon[i], amm$arr_lat[i]), n=200)
 lines(inter, lwd=0.1, col="turquoise2")    
 }
 
@@ -211,18 +154,9 @@ lines(inter, lwd=0.1, col="turquoise2")
 amm_arr <- st_as_sf(amm_arr)
 # sf::sf_use_s2(FALSE)
 flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
-flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
+flightmap_sort <- flightmap %>% group_by(NAME) %>% count() %>% filter(flightmap_sort$NAME != "Switzerland")
 
-# create map
-ggplot() +
-  geom_sf(data=world)+
-  geom_sf(data = flightmap_sort, aes(fill = n)) +
-  labs(fill = "Locations per country") +
-  scico::scale_fill_scico(palette = "bilbao")+  
-  theme(panel.grid.minor = element_blank())+
-  ggtitle("Arrival locations for all GIUZ flights counnted by country")+
-  xlab("Longitude") + ylab("Latitude")+
-  theme(legend.position = "none")
+write.table(flightmap_sort,file="countryflights_counted.csv")
 ```
 
 Subset all the flights that are entirely in Europa using the world- df and the amm- dataframe and crosslinking it bei ISO2 codes. 
@@ -234,15 +168,15 @@ EUISO2$X <- NULL
 EUISO2$ï..Name<-gsub("Â","",as.character(EUISO2$ï..Name)) 
 names(EUISO2)[1] <- "Name"
 
-
 #subset of european countries from world df
 europe<- left_join(EUISO2, world)
 europe$Name <- NULL
 europe_ohne_RU <-subset(europe, ISO2!= "RU")
 #just european flights arrival and departure 
-europe_arr <- amm[which(amm$arr_country %in% unique(EUISO2$ISO2)),]
+europe_arr <- amm[which(amm$arr_country %in% unique(EUISO2$ISO2)),] 
+europe_arr <- europe_arr %>% filter(arr_country != "RU")
 europe_dep <- amm[which(amm$dep_country %in% unique(EUISO2$ISO2)),]
-
+europe_dep <- europe_dep %>% filter(dep_country != "RU")
 
 ```
 
@@ -250,12 +184,12 @@ Create subset from world-df using the EUISO2-df and select all only European fli
 ```{r}
 arrdep_europe <-ggplot() +
   geom_sf(data=europe_ohne_RU, aes(geometry = geometry))+
-  geom_sf(data = europe_dep, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = .5, shape = 23) +
-  geom_sf(data = europe_arr, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = .5, shape = 23) +
+  geom_sf(data = europe_dep, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = 2, shape = 9) +
+  geom_sf(data = europe_arr, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = .75, shape = 19) +
   ggtitle("Departure and arrival locations for all european flights separated by symbols")+ xlab("Longitude") + ylab("Latitude")+
   scale_color_manual(labels = c("Arrival", "Departure"),
                      values = c("red", "blue"))+
-  labs(colour = "Flight path")+
+  labs(colour = "Flight path") +
   theme(legend.position = "none")
 arrdep_europe
 ```
@@ -265,13 +199,6 @@ map("world", fill=T, col="grey8", bg="grey15")
 #overlay airports
 points(europe_dep$longitude_deg.x, europe_dep$latitude_deg.x, pch=3, cex=0.1, col="chocolate1")+
 points(europe_arr$longitude_deg.y, europe_arr$latitude_deg.y, pch=3, cex=0.1, col="turquoise")
-```
-
-
-```{r Flightpath}
-# flightpath_df <- amm %>% select(c("DEPARTURE_AIRPORT", "ARRIVAL_AIRPORT"))
-# 
-# flightpath <- plot_flights(flightpath_df)
 ```
 
 ```{r}
@@ -315,9 +242,7 @@ max_co2 <- max(aggregated_uzh$total_emission)
 
 ```
 
-
 ```{r FLight Statistic}
-
 # Total air travel at Giuz
 total_co2_plot <- ggplot() + 
   geom_line(data=uzh_target_co2, 
@@ -347,4 +272,106 @@ total_co2_plot <- ggplot() +
 total_co2_plot
 ```
 
+
+Difference in kgCO27km flying with economy and business class
+
+```{r}
+#Business
+amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv")) 
+amm_business$EMISSIONS_KGCO2EQ <- as.numeric(amm_business$EMISSIONS_KGCO2EQ)
+amm_business <- amm_business %>% drop_na(EMISSIONS_KGCO2EQ)
+
+amm_business <- left_join(amm_business,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm_business <- amm_business %>% rename(dep_coordinates = coordinates,
+                      dep_country = iso_country)
+amm_business <- left_join(amm_business,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_business <- amm_business %>% rename(arr_coordinates = coordinates,
+                      arr_country = iso_country)
+amm_business <- amm_business %>% rename(dep_lon = longitude_deg.x,
+                                        dep_lat = latitude_deg.x,
+                                        arr_lon = longitude_deg.y,
+                                        arr_lat = latitude_deg.y)
+
+amm_business <- amm_business %>% rowwise() %>% 
+    mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
+                                  c(arr_lon, arr_lat)))/1000)
+amm_business <- amm_business %>% rowwise() %>% mutate(kgCO2km = EMISSIONS_KGCO2EQ / distance_km)
+amm_business = amm_business[,!(names(amm_business) %in% drop)]
+
+#Economy
+amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv")) 
+amm_economy$EMISSIONS_KGCO2EQ <- as.numeric(amm_economy$EMISSIONS_KGCO2EQ)
+amm_economy <- amm_economy %>% drop_na(EMISSIONS_KGCO2EQ)
+
+amm_economy <- left_join(amm_economy,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm_economy <- amm_economy %>% rename(dep_coordinates = coordinates,
+                      dep_country = iso_country)
+amm_economy <- left_join(amm_economy,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_economy <- amm_economy %>% rename(arr_coordinates = coordinates,
+                      arr_country = iso_country)
+
+amm_economy <- amm_economy %>% rename(dep_lon = longitude_deg.x,
+                                        dep_lat = latitude_deg.x,
+                                        arr_lon = longitude_deg.y,
+                                        arr_lat = latitude_deg.y)
+
+amm_economy <- amm_economy %>% rowwise() %>% 
+    mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
+                                  c(arr_lon, arr_lat)))/1000)
+
+amm_economy <- amm_economy %>% rowwise() %>% mutate(kgCO2km = EMISSIONS_KGCO2EQ / distance_km)
+amm_economy = amm_economy[,!(names(amm_economy) %in% drop)]
+```
+
+```{r}
+eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_discrete(name = "Reason for travel")+
+    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
+    xlab("") +
+    ylab("emissions [kgCO2]") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
+eco2
+
+ggsave(file="flight_class.png", eco2,
+       width = 10,
+       height= 7)
+
+eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_discrete(name = "Reason for travel")+
+    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
+    xlab("") +
+    ylab("emissions [kgCO2]") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
+eco2
+
+ggsave(file="flight_class.png", eco2,
+       width = 10,
+       height= 7)
+
+eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_discrete(name = "Reason for travel")+
+    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
+    xlab("") +
+    ylab("emissions [kgCO2]") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
+eco2
+
+ggsave(file="flight_class.png", eco2,
+       width = 10,
+       height= 7)
+
+
+```
 

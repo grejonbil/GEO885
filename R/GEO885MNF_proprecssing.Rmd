@@ -1,0 +1,59 @@
+---
+title: "GEO885MNF_preprocessing"
+author: "Gregory Biland"
+date: "5/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Dataset with no emissions info 
+```{r}
+amm_incomplete <- amm_incomplete %>% rename(flight_number = Flugnummer,
+                      DEPARTURE_AIRPORT = Abflug,
+                      ARRIVAL_AIRPORT = Destination,
+                      EMISSIONS_KGCO2EQ = "THG-Emissionen (in t CO2e)",
+                      cabin_class = Serviceklasse,
+                      currencies = "Kosten (in CHF)",
+                      year = Jahr,
+                      distance = "Distanz (in km)")
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "Y"] <- "economy"
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "B"] <- "business"
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "F"] <- "first"
+amm_incomplete$cabin_class[amm_incomplete$cabin_class == "P"] <- "premium_economy"
+amm_incomplete$currencies <- "USD"
+amm_incomplete <- amm_incomplete %>% dplyr::select(-c(EMISSIONS_KGCO2EQ, distance))
+
+amm_incomplete <- amm_incomplete %>%
+  separate("flight_number", 
+           into = c("fn_code", "fn_number"), 
+           sep = "(?<=[A-Za-z])(?=[0-9])")
+
+amm_incomplete <- subset(amm_incomplete, RecID != 6869)
+
+write.csv(amm_incomplete, file = "amm_incomplete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+
+```
+
+```{r}
+# Create all- business and economy datasets
+amm_business_incomplete <- amm
+amm_business_incomplete <- subset(amm_business_incomplete, select = -c(EMISSIONS_KGCO2EQ))
+amm_business_incomplete$cabin_class[amm_business_incomplete$cabin_class == "economy"] <- "business"
+amm_business_incomplete$cabin_class[amm_business_incomplete$cabin_class == "premium_economy"] <- "business"
+amm_business_incomplete$cabin_class[amm_business_incomplete$cabin_class == "first"] <- "business"
+
+amm_economy_incomplete <- amm
+amm_economy_incomplete <- subset(amm_economy_incomplete, select = -c(EMISSIONS_KGCO2EQ))
+amm_economy_incomplete$cabin_class[amm_economy_incomplete$cabin_class == "business"] <- "economy"
+amm_economy_incomplete$cabin_class[amm_economy_incomplete$cabin_class == "premium_economy"] <- "economy"
+amm_economy_incomplete$cabin_class[amm_economy_incomplete$cabin_class == "first"] <- "economy"
+
+write.csv(amm_business_incomplete, file = "amm_business.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+write.csv(amm_economy_incomplete, file = "amm_economy.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+
+```
+
+
