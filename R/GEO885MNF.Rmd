@@ -140,23 +140,24 @@ ZRH <- filter(amm, DEPARTURE_AIRPORT!="ZRH")
 map("world", fill=T, col="grey8", bg="grey15")
 #overlay airports
 points(amm$dep_lon, amm$dep_lat, pch=3, cex=0.1, col="chocolate1")+
-points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.1, col="chocolate1")
+points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.1, col="chocolate1") + title(main = "MNF flight paths world wide",col.main= "white", cex.main = .75)
 
-for (i in (1:dim(amm)[1])) { 
-inter <- gcIntermediate(c(ZRH$dep_lon[1], ZRH$dep_lat[1]), c(amm$arr_lon[i], amm$arr_lat[i]), n=200)
-lines(inter, lwd=0.1, col="turquoise2")    
+for (i in (1:dim(amm)[1])){
+inter <- gcIntermediate(c(amm$dep_lon[i], amm$dep_lat[i]), c(amm$arr_lon[i], amm$arr_lat[i]))
+lines(inter, lwd=0.25, col="turquoise2") 
 }
-
-
 ```
 
 ```{r}
 amm_arr <- st_as_sf(amm_arr)
-# sf::sf_use_s2(FALSE)
+sf::sf_use_s2(FALSE)
 flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
-flightmap_sort <- flightmap %>% group_by(NAME) %>% count() %>% filter(flightmap_sort$NAME != "Switzerland")
+flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
+flightmap_sort <- flightmap_sort %>% filter(flightmap_sort$NAME != "Switzerland")
+countryflighty_counted = flightmap_sort
+countryflighty_counted$geometry = NULL
 
-write.table(flightmap_sort,file="countryflights_counted.csv")
+write.table(countryflighty_counted,file="countryflights_counted.csv")
 ```
 
 Subset all the flights that are entirely in Europa using the world- df and the amm- dataframe and crosslinking it bei ISO2 codes. 
@@ -192,18 +193,22 @@ arrdep_europe <-ggplot() +
   labs(colour = "Flight path") +
   theme(legend.position = "none")
 arrdep_europe
+
+ggsave(file="europe_flights.png", arrdep_europe,
+       width = 10,
+       height= 7)
 ```
 
 ```{r}
 map("world", fill=T, col="grey8", bg="grey15")
 #overlay airports
-points(europe_dep$longitude_deg.x, europe_dep$latitude_deg.x, pch=3, cex=0.1, col="chocolate1")+
-points(europe_arr$longitude_deg.y, europe_arr$latitude_deg.y, pch=3, cex=0.1, col="turquoise")
+points(europe_dep$dep_lon, europe_dep$dep_lat, pch=3, cex=0.1, col="chocolate1")+
+points(europe_arr$arr_lon, europe_arr$arr_lat, pch=3, cex=0.1, col="turquoise") + title(main = "MNF flights europe",col.main= "white", cex.main = 1.5)
 ```
 
 ```{r}
 cc_count_in <- amm_incomplete %>%
-  group_by(cabin_class) %>%
+  group_by(Serviceklasse) %>%
   summarise(cnt = n()) %>%
   mutate(freq = round(cnt / sum(cnt), 2)) %>% 
   arrange(desc(freq))
@@ -340,7 +345,12 @@ ggsave(file="flight_class.png", eco2,
        width = 10,
        height= 7)
 
-eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+emissions_per_class_business <- amm_business %>%
+  group_by(year, cabin_class) %>%
+  summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
+
+max_distance <- max(aggregated_distance$total_distance) 
+eco2_business <- ggplot(emissions_per_class_business, aes(fill=cabin_class, y=total_emissions, x=year)) + 
     geom_bar(position="stack", stat="identity") +
     scale_fill_discrete(name = "Reason for travel")+
     ggtitle("Cabin class for each flight at MNF (2018-2020)") +
@@ -350,13 +360,17 @@ eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=y
                        limits=c(0,max_distance*1.02)) +
     theme_bw() + 
     theme(legend.position = c(0.86, 0.7))
-eco2
+eco2_business
 
-ggsave(file="flight_class.png", eco2,
+ggsave(file="flight_class_business.png", eco2_business,
        width = 10,
        height= 7)
 
-eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
+emissions_per_class_economy <- amm_economy %>%
+  group_by(year, cabin_class) %>%
+  summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
+
+eco2_economy <- ggplot(emissions_per_class_economy, aes(fill=cabin_class, y=total_emissions, x=year)) + 
     geom_bar(position="stack", stat="identity") +
     scale_fill_discrete(name = "Reason for travel")+
     ggtitle("Cabin class for each flight at MNF (2018-2020)") +
@@ -366,12 +380,24 @@ eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=y
                        limits=c(0,max_distance*1.02)) +
     theme_bw() + 
     theme(legend.position = c(0.86, 0.7))
-eco2
+eco2_economy
 
-ggsave(file="flight_class.png", eco2,
+ggsave(file="flight_class_economoy.png", eco2_economy,
        width = 10,
        height= 7)
 
+ggplot() + 
+    geom_line(data = emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year), position="stack", stat="identity")+
+    geom_line(data = emissions_per_class_economy, aes(fill=cabin_class, y=total_emissions, x=year), position="stack",stat="identity")+
+    geom_line(data = emissions_per_class_business, aes(fill=cabin_class, y=total_emissions, x=year), position="stack",stat="identity")+
+    scale_fill_discrete(name = "Reason for travel")+
+    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
+    xlab("") +
+    ylab("emissions [kgCO2]") +
+    scale_y_continuous(label=comma,
+                       limits=c(0,max_distance*1.02)) +
+    theme_bw() + 
+    theme(legend.position = c(0.86, 0.7))
 
 ```
 
