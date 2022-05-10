@@ -251,7 +251,7 @@ max_co2 <- max(aggregated_uzh$total_emission)
 ```
 
 ```{r FLight Statistic}
-# Total air travel at Giuz
+# Total air travel at MNF
 total_co2_plot <- ggplot() + 
   geom_line(data=uzh_target_co2, 
             aes(x, y, color="target UZH"), linetype="dashed",  
@@ -280,18 +280,23 @@ total_co2_plot <- ggplot() +
 total_co2_plot
 ```
 
+```{r}
+#Tidy dataframes for kgCO2 per km analysis
+amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv"), sep = ",")
+amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv"), sep = ",")
+
+amm <- amm %>% as.data.frame()
+amm <- amm %>% filter_all(all_vars(!is.infinite(kgCO2km))) %>% drop_na(kgCO2km)
+
+amm_business <- amm_business %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT)
+amm_economy <- amm_economy %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT)
+amm <- amm %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT)
+```
 
 Difference in kgCO27km flying with economy and business class
 
 ```{r}
-amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv"), sep = ";")
-amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv"), sep = ";") 
-
-amm <- amm %>% as.data.frame() %>% 
-  filter_all(all_vars(!is.infinite(.))) %>% drop_na(kgCO2km)
-```
-
-```{r}
+#Plot actual emissions per cabin class for original dataset
 eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
     geom_bar(position="stack", stat="identity") +
     scale_fill_discrete(name = "Reason for travel")+
@@ -308,36 +313,52 @@ ggsave(file="Figures/flight_class.png", eco2,
        width = 10,
        height= 7)
 
+#Calculate emissions per cabinclass for altered data sets and merge with original to full list df
 emissions_per_class_business <- amm_business %>%
   group_by(year, cabin_class) %>%
   summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
+
+emissions_per_class_business$cabin_class[emissions_per_class_business$cabin_class == "business"] <- "all_business"
 
 emissions_per_class_economy <- amm_economy %>%
   group_by(year, cabin_class) %>%
   summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
 
-ggplot() + 
-    geom_line(data = emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year), position="stack", stat="identity")+
-    geom_line(data = emissions_per_class_economy, aes(fill=cabin_class, y=total_emissions, x=year), position="stack",stat="identity")+
-    geom_line(data = emissions_per_class_business, aes(fill=cabin_class, y=total_emissions, x=year), position="stack",stat="identity")+
+emissions_per_class_economy$cabin_class[emissions_per_class_economy$cabin_class == "economy"] <- "all_economy"
+
+emissions_list <- rbind(emissions_per_class, emissions_per_class_business, emissions_per_class_economy) #All emissions per class data frames in one
+
+#Plot all three different data frames into one to compare emissions
+all_emissions_plot <- ggplot() + 
+    geom_col(data = emissions_list, aes(fill=cabin_class, y=total_emissions, x=year), position="dodge", stat="identity")+
     scale_fill_discrete(name = "Reason for travel")+
-    ggtitle("Cabin class for each flight at MNF (2018-2020)") +
+    ggtitle("Emissions for each cabin class at the MNF (2018-2020)") +
     xlab("") +
     ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
     theme_bw() + 
     theme(legend.position = c(0.86, 0.7))
+all_emissions_plot
+ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
+       width = 10,
+       height= 7)
 
-
-
-ggplot()+
+emission_distance_plot <- ggplot()+
   geom_line(data = amm_business, aes(y= kgCO2km, x = distance_km, col = "red"))+
   geom_line(data = amm, aes(y= kgCO2km, x = distance_km, col = "blue"))+
   geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col = "green"))+
   ggtitle("kgCO2 emitted per km flying")+
   scale_color_manual(labels = c("Business", "Regular", "Economy"),
-                     values = c("red", "blue","green"))
+                     values = c("red", "blue","green"))+
+  ylab("kgCO2 emitted per flight km")+
+  xlab("Flight distance [km]")+
+  labs(colour = "Cabin class")
+emission_distance_plot
+
+ggsave(file="Figures/emissions_distance.png", emission_distance_plot,
+       width = 10,
+       height= 7)
 
 paste("The mean emissions in kgCO2 per km flying for all business flights is", mean(amm_business$kgCO2km))
 paste("The mean emissions in kgCO2 per km flying for all economy flights is", mean(amm_economy$kgCO2km))
