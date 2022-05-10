@@ -56,4 +56,62 @@ write.csv(amm_economy_incomplete, file = "amm_economy.csv", row.names=FALSE) # E
 
 ```
 
+```{r}
+#Business
+amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv")) 
+amm_business$EMISSIONS_KGCO2EQ <- as.numeric(amm_business$EMISSIONS_KGCO2EQ)
+amm_business <- amm_business %>% drop_na(EMISSIONS_KGCO2EQ)
+
+amm_business <- left_join(amm_business,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm_business <- amm_business %>% rename(dep_coordinates = coordinates,
+                      dep_country = iso_country)
+amm_business <- left_join(amm_business,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_business <- amm_business %>% rename(arr_coordinates = coordinates,
+                      arr_country = iso_country)
+amm_business <- amm_business %>% rename(dep_lon = longitude_deg.x,
+                                        dep_lat = latitude_deg.x,
+                                        arr_lon = longitude_deg.y,
+                                        arr_lat = latitude_deg.y)
+
+amm_business <- amm_business %>% rowwise() %>% 
+    mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
+                                  c(arr_lon, arr_lat)))/1000)
+amm_business <- amm_business %>% rowwise() %>% mutate(kgCO2km = EMISSIONS_KGCO2EQ / distance_km)
+amm_business = amm_business[,!(names(amm_business) %in% drop)]
+
+#Economy
+amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv")) 
+amm_economy$EMISSIONS_KGCO2EQ <- as.numeric(amm_economy$EMISSIONS_KGCO2EQ)
+amm_economy <- amm_economy %>% drop_na(EMISSIONS_KGCO2EQ)
+
+amm_economy <- left_join(amm_economy,airports, by = c("DEPARTURE_AIRPORT" = "iata_code"))
+amm_economy <- amm_economy %>% rename(dep_coordinates = coordinates,
+                      dep_country = iso_country)
+amm_economy <- left_join(amm_economy,airports, by = c("ARRIVAL_AIRPORT" = "iata_code"))
+amm_economy <- amm_economy %>% rename(arr_coordinates = coordinates,
+                      arr_country = iso_country)
+
+amm_economy <- amm_economy %>% rename(dep_lon = longitude_deg.x,
+                                        dep_lat = latitude_deg.x,
+                                        arr_lon = longitude_deg.y,
+                                        arr_lat = latitude_deg.y)
+
+amm_economy <- amm_economy %>% rowwise() %>% 
+    mutate(distance_km = (geosphere::distHaversine(c(dep_lon, dep_lat),
+                                  c(arr_lon, arr_lat)))/1000)
+
+amm_economy <- amm_economy %>% rowwise() %>% mutate(kgCO2km = EMISSIONS_KGCO2EQ / distance_km)
+amm_economy = amm_economy[,!(names(amm_economy) %in% drop)]
+
+amm_economy <- amm_economy %>% 
+  filter_all(all_vars(!is.infinite(.))) %>% drop_na(kgCO2km)
+
+amm_business <- amm_business %>% 
+  filter_all(all_vars(!is.infinite(.))) %>% drop_na(kgCO2km)
+
+write.csv(amm_business, file = "amm_business_complete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+write.csv(amm_economy, file = "amm_economy_complete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
+
+```
+
 
