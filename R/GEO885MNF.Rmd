@@ -236,7 +236,7 @@ aggregated_uzh_regular <- amm %>%
                                             .before = 1, .after = 1,
                                             .complete = T)) 
 # UZH: only 2018 and 2019
-uzh_baseline_co2 <- aggregated_uzh %>%
+uzh_baseline_co2 <- aggregated_uzh_regular %>%
   filter(year %in% reference_period[]) %>%
   summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
   pull(mean)
@@ -246,7 +246,7 @@ uzh_target_co2 <- data.frame(x=target_period,
                              y=c(uzh_baseline_co2, 
                                  (uzh_baseline_co2/100)*0.47)) 
 
-max_co2 <- max(aggregated_uzh$total_emission) 
+max_co2 <- max(aggregated_uzh_regular$total_emission)
 
 ```
 
@@ -318,6 +318,7 @@ emission_distance_plot <- ggplot()+
   geom_line(data = amm_business, aes(y= kgCO2km, x = distance_km, col="red"))+
   geom_line(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"))+
   geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"))+
+  geom_vline(xintercept = 1000, linetype="dotted", size=.5)+
   ggtitle("kgCO2 emitted per km flying")+
   scale_color_manual(labels = c("Regular", "Economy", "Business"),
                      values = c("blue", "green","red"))+
