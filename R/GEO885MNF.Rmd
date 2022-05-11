@@ -165,9 +165,9 @@ Subset all the flights that are entirely in Europa using the world- df and the a
 ```{r}
 #ISO2 form european countries
 EUISO2 <- read.csv(file.path(dataFolder, "EuroAlpha2-Codes.csv"), sep = ";") 
-EUISO2$X <- NULL
-EUISO2$Name<-gsub("Â","",as.character(EUISO2$Name)) 
 names(EUISO2)[1] <- "Name"
+EUISO2$Name <-gsub("Â","",as.character(EUISO2$Name)) 
+
 
 #subset of european countries from world df
 europe<- left_join(EUISO2, world)
@@ -345,12 +345,12 @@ ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
        height= 7)
 
 emission_distance_plot <- ggplot()+
-  geom_line(data = amm_business, aes(y= kgCO2km, x = distance_km, col = "red"))+
-  geom_line(data = amm, aes(y= kgCO2km, x = distance_km, col = "blue"))+
-  geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col = "green"))+
+  geom_line(data = amm_business, aes(y= kgCO2km, x = distance_km, col="red"))+
+  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"))+
+  geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"))+
   ggtitle("kgCO2 emitted per km flying")+
-  scale_color_manual(labels = c("Business", "Regular", "Economy"),
-                     values = c("red", "blue","green"))+
+  scale_color_manual(labels = c("Regular", "Economy", "Business"),
+                     values = c("blue", "green","red"))+
   ylab("kgCO2 emitted per flight km")+
   xlab("Flight distance [km]")+
   labs(colour = "Cabin class")
