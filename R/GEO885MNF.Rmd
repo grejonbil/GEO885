@@ -149,14 +149,6 @@ lines(inter, lwd=0.25, col="turquoise2")
 ```
 
 ```{r include=FALSE}
-amm_arr <- st_as_sf(amm_arr)
-sf::sf_use_s2(FALSE)
-flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
-flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
-flightmap_sort <- flightmap_sort %>% filter(flightmap_sort$NAME != "Switzerland")
-countryflighty_counted = flightmap_sort
-countryflighty_counted$geometry = NULL
-
 write.table(countryflighty_counted,file="countryflights_counted.csv")
 ```
 
@@ -226,7 +218,7 @@ amm = amm[,!(names(amm) %in% drop)]
 
 ```{r compute baselines CO2}
 reference_period <- c(2018:2020)
-target_period <- c(2022, 2030)
+target_period <- c(2019, 2030)
 full_period <- c(2018:2030)
 
 aggregated_uzh_regular <- amm %>% 
@@ -235,16 +227,32 @@ aggregated_uzh_regular <- amm %>%
   mutate(total_emission_3y_mean = slide_dbl(total_emission, mean, 
                                             .before = 1, .after = 1,
                                             .complete = T)) 
+#Determine difference in emissions between all economy and regular flight data
+aggregated_uzh_economy <- amm_economy %>% 
+  group_by(year) %>% 
+  summarise(total_emission = sum(EMISSIONS_KGCO2EQ, na.rm=FALSE)) %>%
+  mutate(total_emission_3y_mean = slide_dbl(total_emission, mean, 
+                                            .before = 1, .after = 1,
+                                            .complete = T)) 
+
+#mean emissions for 2018 and 2019: 1384100
 # UZH: only 2018 and 2019
-uzh_baseline_co2 <- aggregated_uzh_regular %>%
+uzh_baseline_co2_regular <- aggregated_uzh_regular %>%
+  filter(year %in% reference_period[]) %>%
+  summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
+  pull(mean)
+
+uzh_baseline_co2_economy <- aggregated_uzh_economy %>%
   filter(year %in% reference_period[]) %>%
   summarize(mean = mean(total_emission, na.rm=TRUE)) %>%
   pull(mean)
 
 # Define target
-uzh_target_co2 <- data.frame(x=target_period,
-                             y=c(uzh_baseline_co2, 
-                                 (uzh_baseline_co2/100)*0.47)) 
+uzh_target_co2_regular <- data.frame(x=target_period,
+                             y=c(uzh_baseline_co2_regular, 
+                                 uzh_baseline_co2_regular*0.47))
+uzh_target_co2_economy <- data.frame(x=c(2019,2019,2030),
+                             y=c(uzh_baseline_co2_regular,uzh_baseline_co2_economy,uzh_baseline_co2_economy*0.49803))
 
 max_co2 <- max(aggregated_uzh_regular$total_emission)
 
@@ -315,9 +323,9 @@ ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
        height= 7)
 
 emission_distance_plot <- ggplot()+
-  geom_line(data = amm_business, aes(y= kgCO2km, x = distance_km, col="red"))+
-  geom_line(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"))+
-  geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"))+
+  geom_point(data = amm_business, aes(y= kgCO2km, x = distance_km, col="red"), size = .1)+
+  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"), size = .1)+
+  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .1)+
   geom_vline(xintercept = 1000, linetype="dotted", size=.5)+
   ggtitle("kgCO2 emitted per km flying")+
   scale_color_manual(labels = c("Regular", "Economy", "Business"),
@@ -334,19 +342,6 @@ ggsave(file="Figures/emissions_distance.png", emission_distance_plot,
 paste("The mean emissions in kgCO2 per km flying for all business flights is", mean(amm_business$kgCO2km))
 paste("The mean emissions in kgCO2 per km flying for all economy flights is", mean(amm_economy$kgCO2km))
 paste("The mean emissions in kgCO2 per km flying for regular flights is", mean(amm$kgCO2km))
-```
-#Determine difference in emissions between all economy and regular flight data
-
-```{r}
-aggregated_uzh_economy <- amm_economy %>% 
-  group_by(year) %>% 
-  summarise(total_emission = sum(EMISSIONS_KGCO2EQ, na.rm=FALSE)) %>%
-  mutate(total_emission_3y_mean = slide_dbl(total_emission, mean, 
-                                            .before = 1, .after = 1,
-                                            .complete = T)) 
-
-aggregated_uzh_regular$total_emission_3y_mean - aggregated_uzh_economy$total_emission_3y_mean #Emissions difference
-
 ```
 
 # Reduction effect of all economy class flights per year to reach goal
@@ -368,17 +363,30 @@ mean(amm_shortdist$EMISSIONS_KGCO2EQ)
 #Reduction goal untill 2030 562245.5kgCO2
 
 ```{r FLight Statistic}
+label <- paste0("MNF reduction target")
+
 # Total air travel at MNF
 total_co2_plot <- ggplot() + 
-  geom_line(data=uzh_target_co2, 
-            aes(x, y, color="target UZH"), linetype="dashed",  
-            size=1) +
+  geom_line(data=uzh_target_co2_regular, 
+            aes(x, y, color="target UZH"), linetype="dotted",  
+            size=.75) +
+  geom_line(data=uzh_target_co2_economy, 
+            aes(x, y, color="target UZH all economy"), linetype="dotted",  
+            size=.75) +
   geom_line(data=aggregated_uzh_economy, 
             aes(x=year, y=total_emission, color="optimal"),
-            size=1) +
+            size=.75) +
   geom_line(data=aggregated_uzh_regular, 
             aes(x=year, y=total_emission, color="observed"),
-            size=1) +
+            size=.75) +
+  geom_point(data=aggregated_uzh_economy, 
+              aes(x=year, y=total_emission),
+              color=orange, size=1.5) +
+  geom_point(data=aggregated_uzh_regular, 
+              aes(x=year, y=total_emission),
+              color=green, size=1.5) +
+  geom_hline(yintercept = 562793.7, linetype="dotted", size=.5)+
+  annotate("text", x = 2018.75, y = 590000, label=label, color=green, size=3) + 
   ylab("kg CO2 eq.") +
   scale_x_continuous(breaks=full_period,
                      limits=c(min(full_period),
@@ -387,20 +395,25 @@ total_co2_plot <- ggplot() +
                      limits=c(0,max_co2*1.02)) +
   ggtitle("UZH air travel (2018-2020): emissions")+
   scale_colour_manual("",
-                      breaks = c("observed","optimal","target UZH"),
-                      values = c(green,orange,red))+
+                      breaks = c("observed","optimal","target UZH", "target UZH all economy"),
+                      values = c(green,orange,red,blue))+
   theme_bw() +
   theme(text = element_text(size=16),
         axis.title.x = element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
-        legend.position = c(0.8, 0.25))
+        legend.position = "right")
 
 total_co2_plot
+
+ggsave(file="Figures/target_goal_plot.png", total_co2_plot,
+       width = 10,
+       height= 7)
 ```
+
 ```{r}
-ggregated_uzh_regular$total_emission_3y_mean
+aggregated_uzh_regular$total_emission_3y_mean
 
 1196267*0.07
 

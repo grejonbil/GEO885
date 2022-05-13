@@ -113,5 +113,15 @@ write.csv(amm_business, file = "amm_business_complete.csv", row.names=FALSE) # E
 write.csv(amm_economy, file = "amm_economy_complete.csv", row.names=FALSE) # Emissions API geht mit beiden files oben, Datensatz
 
 ```
+```{r}
+amm_arr <- st_as_sf(amm_arr)
+sf::sf_use_s2(FALSE)
+flightmap <- st_join(world, amm_arr, join = st_contains_properly, left=TRUE)
+flightmap_sort <- flightmap %>% group_by(NAME) %>% count()
+flightmap_sort <- flightmap_sort %>% filter(flightmap_sort$NAME != "Switzerland")
+countryflighty_counted = flightmap_sort
+countryflighty_counted$geometry = NULL
+```
+
 
 
