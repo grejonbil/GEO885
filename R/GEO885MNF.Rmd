@@ -24,7 +24,7 @@ library(scales)
 library(wesanderson)
 library(here)
 library(maps)
-
+library(isoband)
 
 # sf::sf_use_s2(FALSE)
 
@@ -144,12 +144,14 @@ points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.1, col="chocolate1") + title(main 
 
 for (i in (1:dim(amm)[1])){
 inter <- gcIntermediate(c(amm$dep_lon[i], amm$dep_lat[i]), c(amm$arr_lon[i], amm$arr_lat[i]))
-lines(inter, lwd=0.25, col="turquoise2") 
+lines(inter, lwd=0.1, col="turquoise2") 
 }
+
+
 ```
 
 ```{r include=FALSE}
-write.table(countryflighty_counted,file="countryflights_counted.csv")
+countryflighty_counted <- read.csv(file.path(dataFolder, "countryflights_counted.csv"), sep = " ") #Without Switzerland
 ```
 
 Subset all the flights that are entirely in Europa using the world- df and the amm- dataframe and crosslinking it bei ISO2 codes. 
@@ -171,6 +173,9 @@ europe_arr <- europe_arr %>% filter(arr_country != "RU")
 europe_dep <- amm[which(amm$dep_country %in% unique(EUISO2$ISO2)),]
 europe_dep <- europe_dep %>% filter(dep_country != "RU")
 
+europe_dep <- europe_dep %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT) %>% drop_na(distance_km)
+europe_arr <- europe_arr %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT) %>% drop_na(distance_km)
+
 ```
 
 Create subset from world-df using the EUISO2-df and select all only European flights.
@@ -189,6 +194,13 @@ arrdep_europe
 ggsave(file="Figures/europe_flights.png", arrdep_europe,
        width = 10,
        height= 7)
+
+# contour(volcano,
+#         col = cols)
+
+ggplot(data = europe_dep, aes(x = dep_lon, y = dep_lat))+
+  geom_point()+
+  geom_contour(aes(z= distance_km))
 ```
 
 ```{r}
@@ -217,6 +229,9 @@ amm = amm[,!(names(amm) %in% drop)]
 
 
 ```{r compute baselines CO2}
+amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv"), sep = ",")
+amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv"), sep = ",")
+
 reference_period <- c(2018:2020)
 target_period <- c(2019, 2030)
 full_period <- c(2018:2030)
@@ -260,8 +275,6 @@ max_co2 <- max(aggregated_uzh_regular$total_emission)
 
 ```{r}
 #Tidy dataframes for kgCO2 per km analysis
-amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv"), sep = ",")
-amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv"), sep = ",")
 
 amm <- amm %>% as.data.frame()
 amm <- amm %>% filter_all(all_vars(!is.infinite(kgCO2km))) %>% drop_na(kgCO2km)
@@ -277,13 +290,13 @@ Difference in kgCO27km flying with economy and business class
 #Plot actual emissions per cabin class for original dataset
 eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
     geom_bar(position="stack", stat="identity") +
-    scale_fill_discrete(name = "Reason for travel")+
+    scale_fill_discrete(name = "Cabin class")+
     ggtitle("Cabin class for each flight at MNF (2018-2020)") +
     xlab("") +
     ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
-    theme_bw() + 
+    theme_light() + 
     theme(legend.position = c(0.86, 0.7))
 eco2
 
@@ -302,21 +315,34 @@ emissions_per_class_economy <- amm_economy %>%
   group_by(year, cabin_class) %>%
   summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
 
-emissions_per_class_economy$cabin_class[emissions_per_class_economy$cabin_class == "economy"] <- "all_economy"
+emissions_per_class_economy$cabin_class[emissions_per_class_economy$cabin_class == "economy"] <- "Economy predicted"
 
-emissions_list <- rbind(emissions_per_class, emissions_per_class_business, emissions_per_class_economy) #All emissions per class data frames in one
+#Transform year to observed and predicted
+emissions_per_class_economy$year[emissions_per_class_economy$year == "2018"] <- "2018_predicted"
+emissions_per_class_economy$year[emissions_per_class_economy$year == "2019"] <- "2019_predicted"
+emissions_per_class_economy$year[emissions_per_class_economy$year == "2020"] <- "2020_predicted"
+
+emissions_per_class$year[emissions_per_class$year == "2018"] <- "2018_observed"
+emissions_per_class$year[emissions_per_class$year == "2019"] <- "2019_observed"
+emissions_per_class$year[emissions_per_class$year == "2020"] <- "2020_observed"
+
+emissions_per_class$cabin_class[emissions_per_class$cabin_class == "economy"] <- "Economy observed"
+emissions_per_class$cabin_class[emissions_per_class$cabin_class == "business"] <- "Business observed"
+emissions_per_class$cabin_class[emissions_per_class$cabin_class == "premium_economy"] <- "Premium economy observed"
+emissions_per_class$cabin_class[emissions_per_class$cabin_class == "first"] <- "First observed"
+
 
 #Plot all three different data frames into one to compare emissions
 all_emissions_plot <- ggplot() + 
-    geom_col(data = emissions_list, aes(fill=cabin_class, y=total_emissions, x=year), position="dodge", stat="identity")+
-    scale_fill_discrete(name = "Reason for travel")+
+    geom_col(data = emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year), position="stack", stat="identity", width = .5)+
+    geom_col(data = emissions_per_class_economy, aes(fill=cabin_class, y=total_emissions, x=year), stat="identity", width = .5)+
+    scale_fill_discrete(name = "Cabin class")+
     ggtitle("Emissions for each cabin class at the MNF (2018-2020)") +
     xlab("") +
     ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
-    theme_bw() + 
-    theme(legend.position = c(0.86, 0.7))
+    theme_light() 
 all_emissions_plot
 ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
        width = 10,
@@ -332,7 +358,8 @@ emission_distance_plot <- ggplot()+
                      values = c("blue", "green","red"))+
   ylab("kgCO2 emitted per flight km")+
   xlab("Flight distance [km]")+
-  labs(colour = "Cabin class")
+  labs(colour = "Cabin class")+
+  theme_light()
 emission_distance_plot
 
 ggsave(file="Figures/emissions_distance.png", emission_distance_plot,
@@ -397,7 +424,7 @@ total_co2_plot <- ggplot() +
   scale_colour_manual("",
                       breaks = c("observed","optimal","target UZH", "target UZH all economy"),
                       values = c(green,orange,red,blue))+
-  theme_bw() +
+  theme_light() +
   theme(text = element_text(size=16),
         axis.title.x = element_blank(),
         panel.grid.major.x = element_blank(),
