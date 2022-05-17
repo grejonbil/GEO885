@@ -1,4 +1,5 @@
-amm <- read.csv("~/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/Project/Data and Code/GIUZ_AirTravel_20210509/AIRTRAVELS.csv")
-View(amm)
 
-world_poly <- st_read("/Users/chaualala/Desktop/UZH/MSc Geographie/1. Semester/GEO 871 -  Retrieving Geographic Information/Project/pattern_analysis/TM_WORLD_BORDERS_SIMPL-0/TM_WORLD_BORDERS_SIMPL-0.3.shp")
+df <- data.frame(flight_number = c(1,2,3,4,5,6,7), dep_lon = c(8.548056,8.548056,8.548056,8.548056,8.548056,8.548056,8.548056),
+                 dep_lat = c(47.45806,47.45806,47.45806,47.45806,47.45806,47.45806,47.45806),arr_lon = c(11.548056,16.569700,13.548056, 27.825100, 16.569700,11.569700,19.569700),arr_lat = c(47.45806,48.11030,47.45806,43.23210,48.11030,44.45806,49.45806), EMISSIONS_KGCO2EQ = c(100,200,300,400,1000,400,200))
+
+
