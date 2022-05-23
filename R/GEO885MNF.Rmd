@@ -27,6 +27,7 @@ library(maps)
 library(isoband)
 library(zoo)
 library(metR)
+library(akima)
 
 # sf::sf_use_s2(FALSE)
 
@@ -214,16 +215,16 @@ interp_df <- expand_grid(i = seq_along(interpolated$x), j = seq_along(interpolat
          emissions = map2_dbl(i, j, ~interpolated$z[.x,.y])) %>% 
   select(-i, -j) %>% data.frame()
 
-# interp_df$emissions <- na.aggregate(interp_df$emissions) #Replaces all NA values with the mean of all values in this column
+interp_df$emissions <- na.aggregate(interp_df$emissions) #Replaces all NA values with the mean of all values in this column
 
 
 #then you can use this in your plot
 dep_ZH_plot <- ggplot()+
   geom_sf(data=europe_ohne_RU, aes(geometry = geometry))+
   geom_point(data = dep_ZH, aes(x = dep_lon, y = dep_lat), col = "red", pch = 13, size = 3) +
-  geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat)) +
-  geom_contour(data = interp_df, aes(x = lon, y = lat, z = emissions), show.legend = TRUE)+
-  metR::geom_text_contour(data = interp_df,aes(x = lon, y = lat,z = interp_df$emissions)) +
+  geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat), size = 1) +
+  geom_contour_filled(data = interp_df, aes(x = lon, y = lat, z = emissions), show.legend = TRUE, alpha = .6)+
+  #metR::geom_text_contour(data = interp_df,aes(x = lon, y = lat,z = emissions)) +
   ggtitle("All european flights originating from Switzerland")+ xlab("Longitude") + ylab("Latitude")+
   labs(colour = "Emission zones [kgCO2]")
 
@@ -375,8 +376,8 @@ ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
 
 emission_distance_plot <- ggplot()+
   # geom_point(data = amm_business, aes(y= kgCO2km, x = distance_km, col="red"), size = .1)+
-  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"), size = .1)+
-  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .1)+
+  geom_line(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"), size = .5)+
+  geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .5)+
   geom_vline(xintercept = 1000, linetype="dotted", size=.5)+
   ggtitle("kgCO2 emitted per km flying")+
   scale_color_manual(labels = c("Regular", "Economy"),
