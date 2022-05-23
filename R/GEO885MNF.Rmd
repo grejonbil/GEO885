@@ -27,6 +27,7 @@ library(maps)
 library(isoband)
 library(zoo)
 library(metR)
+
 library(akima)
 
 # sf::sf_use_s2(FALSE)
@@ -205,7 +206,7 @@ ggsave(file="Figures/europe_flights.png", arrdep_europe,
 ```{r}
 interpolated <- interp(dep_ZH$arr_lon, dep_ZH$arr_lat, dep_ZH$EMISSIONS_KGCO2EQ, 
                        duplicate = "mean",    #you have duplicated values
-                       output = "grid",
+                       #output = "grid",
                        extrap = TRUE)
 
 #convert this to a long form dataframe
@@ -442,7 +443,7 @@ total_co2_plot <- ggplot() +
                      limits=c(min(full_period),
                               max(full_period))) +
   scale_y_continuous(label=comma,
-                     limits=c(0,max_co2*1.02)) +
+                     limits=c(400000,1300000)) +
   ggtitle("UZH air travel (2018-2020): emissions")+
   scale_colour_manual("",
                       breaks = c("target UZH", "target UZH all economy"),
