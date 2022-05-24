@@ -161,7 +161,7 @@ points(amm$dep_lon, amm$dep_lat, pch=3, cex=0.1, col="chocolate1")+
 points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.1, col="chocolate1")
 
 for (i in (1:dim(amm)[1])){
-inter <- gcIntermediate(c(amm$dep_lon[i], amm$dep_lat[i]), c(amm$arr_lon[i], amm$arr_lat[i]))
+inter <- gcIntermediate(c(amm$dep_lon[i], amm$dep_lat[i]), c(amm$arr_lon[i], amm$arr_lat[i]), breakAtDateLine = FALSE)
 lines(inter, lwd=0.1, col="turquoise2") 
 }
 
