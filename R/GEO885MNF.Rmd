@@ -29,6 +29,7 @@ library(zoo)
 library(metR)
 library(akima)
 library(ggforce)
+library(colorspace)
 
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -65,6 +66,9 @@ amm_incomplete <- read_excel(file.path(dataFolder, "MNF_amm.xlsx")) #Datensatz m
 
 world <- st_read(file.path(dataFolder, "TM_WORLD_BORDERS_SIMPL-0 Kopie"))
 
+employement_MNF <- data.frame(Jahr = c(2018,2019, 2020, 2021, 2022),
+                              Personen = c(1538,1559,1656,1676,1651 ),
+                              FTE = c(1119.0,1120.7,1170.7,1213.8,1190.3))
 ```
 
 
@@ -229,6 +233,7 @@ interp_df <- expand_grid(i = seq_along(interpolated$x), j = seq_along(interpolat
 dep_ZH_plot_iso <- ggplot()+
   geom_sf(data=europe_ohne_RU, aes(geometry = geometry))+
   geom_contour_filled(data = interp_df, aes(x = lon, y = lat, z = emissions),show.legend = TRUE, alpha = .5)+
+  scale_fill_viridis_d(option = "viridis",direction = -1)+
   geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat), size = 1) +
   geom_point(data = dep_ZH, aes(x = dep_lon, y = dep_lat), col = "red", pch = 13, size = 2) +
   xlab("Longitude") + ylab("Latitude")+
@@ -246,10 +251,10 @@ ggsave(file="Figures/dep_ZH_europeflights_iso.png", dep_ZH_plot_iso,
 countryflighty_counted_EU <- left_join(europe_ohne_RU, countryflighty_counted) %>% drop_na()
 
 dep_ZH_plot_distance <- ggplot()+
-  geom_sf(data=countryflighty_counted_EU, aes(geometry = geometry, fill = n))+
-  scale_fill_viridis_c(option = "rocket",direction = -1, labs( colour=  "Count per country"))+
+  geom_sf(data=countryflighty_counted_EU, aes(geometry = geometry, fill = n), alpha = .5)+
+  scale_fill_viridis_c(option = "bilbao",direction = -1, labs( colour=  "Count per country"))+
   geom_point(data = dep_ZH, aes(x = dep_lon, y = dep_lat), col = "red", pch = 13, size = 3) +
-  geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat), size = 1, col = "black") +
+  geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat), size = 2, col = "black") +
   geom_circle(aes(y0 = 47.45806, x0 =8.548056, r = 11), geom = "circle", position = "identity", col = "red")+
   xlab("Longitude") + ylab("Latitude")
 
@@ -339,11 +344,11 @@ Difference in kgCO27km flying with economy and business class
 
 ```{r}
 #Plot actual emissions per cabin class for original dataset
-eco2 <- ggplot(emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year)) + 
-    geom_bar(position="stack", stat="identity") +
-    scale_fill_discrete(name = "Cabin class")+
+eco2 <- ggplot() + 
+    geom_col(data = emissions_per_class, aes(y=total_emissions, x=year,group = fct_rev(fct_inorder(cabin_class)), fill = cabin_class), position="stack", stat="identity", width = .5)+
+    scale_fill_viridis_d(direction = -1, labs( colour=  "Cabin class"))+
     ggtitle("Cabin class for each flight at MNF (2018-2020)") +
-    xlab("") +
+    xlab("Year") +
     ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
@@ -354,7 +359,9 @@ eco2
 ggsave(file="Figures/flight_class.png", eco2,
        width = 10,
        height= 7)
+```
 
+```{r}
 #Calculate emissions per cabinclass for altered data sets and merge with original to full list df
 emissions_per_class_business <- amm_business %>%
   group_by(year, cabin_class) %>%
@@ -366,7 +373,7 @@ emissions_per_class_economy <- amm_economy %>%
   group_by(year, cabin_class) %>%
   summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
 
-emissions_per_class_economy$cabin_class[emissions_per_class_economy$cabin_class == "economy"] <- "Economy predicted"
+emissions_per_class_economy$cabin_class[emissions_per_class_economy$cabin_class == "economy"] <- "Model: all Economy"
 
 #Transform year to observed and predicted
 emissions_per_class_economy$year[emissions_per_class_economy$year == "2018"] <- "2018_predicted"
@@ -382,18 +389,28 @@ emissions_per_class$cabin_class[emissions_per_class$cabin_class == "business"] <
 emissions_per_class$cabin_class[emissions_per_class$cabin_class == "premium_economy"] <- "Premium economy observed"
 emissions_per_class$cabin_class[emissions_per_class$cabin_class == "first"] <- "First observed"
 
+emissions_per_class <- emissions_per_class %>% mutate(id = seq_along(year))
+```
+
+
+```{r}
+vec_re <- c(2,3,1,5,6,4,8,10,7,9)
+
+emissions_per_class <- emissions_per_class %>%
+  slice(match(vec_re, id))
 
 #Plot all three different data frames into one to compare emissions
 all_emissions_plot <- ggplot() + 
-    geom_col(data = emissions_per_class, aes(fill=cabin_class, y=total_emissions, x=year), position="stack", stat="identity", width = .5)+
-    geom_col(data = emissions_per_class_economy, aes(fill=cabin_class, y=total_emissions, x=year), stat="identity", width = .5)+
-    scale_fill_discrete(name = "Cabin class")+
+    geom_col(data = emissions_per_class, aes(y=total_emissions, x=year,group = fct_rev(fct_inorder(cabin_class)), fill = cabin_class), position="stack", stat="identity", width = .5)+
+    geom_col(data = emissions_per_class_economy, aes(y=total_emissions, x=year, fill = cabin_class), stat="identity", width = .5)+
+    scale_fill_viridis_d(direction = -1, labs( colour=  "Cabin class"))+
     ggtitle("Emissions for each cabin class at the MNF (2018-2020)") +
-    xlab("") +
+    xlab("year") +
     ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
     theme_light() 
+
 all_emissions_plot
 ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
        width = 10,
@@ -402,12 +419,11 @@ ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
 label <- paste0("1000km threshold")
 
 emission_distance_plot <- ggplot()+
-  # geom_point(data = amm_business, aes(y= kgCO2km, x = distance_km, col="red"), size = .1)+
-  geom_line(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"), size = .5)+
-  geom_line(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .5)+
+  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"), size = .7, pch = 14)+
+  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .4, pch = 23)+
   geom_vline(xintercept = 1000, linetype="dotted", size=.5)+
-  scale_color_manual(labels = c("Observed", "Economy"),
-                     values = c("blue", "red"))+
+  scale_color_manual(labels = c("Observed", "Model: all Economy"),
+                     values = c("440154FF", "5DC863FF"))+
   annotate("text", x = 2700, y = 1, label=label, color=black, size=3) + 
   ylab("kgCO2 emitted per flight km")+
   xlab("Flight distance [km]")+
@@ -497,7 +513,7 @@ paste("The mean emissions in kgCO2 per km flying for all business flights is", m
 paste("The mean emissions in kgCO2 per km flying for all economy flights is", mean(amm_economy$kgCO2km))
 paste("The mean emissions in kgCO2 per km flying for regular flights is", mean(amm$kgCO2km))
 
-
+summary(amm)
 
 ```
 
