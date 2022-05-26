@@ -345,7 +345,7 @@ Difference in kgCO27km flying with economy and business class
 ```{r}
 #Plot actual emissions per cabin class for original dataset
 eco2 <- ggplot() + 
-    geom_col(data = emissions_per_class, aes(y=total_emissions, x=year,group = fct_rev(fct_inorder(cabin_class)), fill = cabin_class), position="stack", stat="identity", width = .5)+
+    geom_col(data = emissions_per_class, aes(y=total_emissions, x=year, fill = cabin_class), position="stack", stat="identity", width = .5)+
     scale_fill_viridis_d(direction = -1, labs( colour=  "Cabin class"))+
     ggtitle("Cabin class for each flight at MNF (2018-2020)") +
     xlab("Year") +
@@ -416,15 +416,15 @@ ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
        width = 10,
        height= 7)
 
-label <- paste0("1000km threshold")
+label1 <- paste0("1000km threshold")
 
 emission_distance_plot <- ggplot()+
-  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="blue"), size = .7, pch = 14)+
-  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .4, pch = 23)+
+  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="yellow"), size = 1)+
+  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .4)+
   geom_vline(xintercept = 1000, linetype="dotted", size=.5)+
-  scale_color_manual(labels = c("Observed", "Model: all Economy"),
-                     values = c("440154FF", "5DC863FF"))+
-  annotate("text", x = 2700, y = 1, label=label, color=black, size=3) + 
+  scale_color_manual(labels = c("Economy modeled", "Observed"),
+                     values = c("#00BA38", "#D55E00"))+
+  annotate("text", x = 3000, y = 1, label=label1, color=black, size=3) + 
   ylab("kgCO2 emitted per flight km")+
   xlab("Flight distance [km]")+
   labs(colour = "Cabin class")+
@@ -457,7 +457,7 @@ mean(amm_shortdist$EMISSIONS_KGCO2EQ)
 #Reduction goal untill 2030 562245.5kgCO2
 
 ```{r FLight Statistic}
-label <- paste0("MNF reduction target")
+label2 <- paste0("MNF reduction target")
 
 # Total air travel at MNF
 total_co2_plot <- ggplot() + 
@@ -480,7 +480,7 @@ total_co2_plot <- ggplot() +
   #             aes(x=year, y=total_emission),
   #             color=green, size=1.5) +
   geom_hline(yintercept = 562793.7, linetype="dotted", size=.5)+
-  annotate("text", x = 2018.75, y = 590000, label=label, color=green, size=3) + 
+  annotate("text", x = 2018.75, y = 590000, label=label2, color=green, size=3) + 
   ylab("kg CO2 eq.") +
   scale_x_continuous(breaks=full_period,
                      limits=c(min(full_period),
