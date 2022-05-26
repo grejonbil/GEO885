@@ -452,6 +452,14 @@ mean(amm_shortdist$EMISSIONS_KGCO2EQ)
 #0.9625148
 #Reduce short dist flighty by 96% untill the year 2030
 
+567854.5/226.7974
+#2503.796 --> mean all economy 1130100 kgCO2, reduction per year 
+2503.796/nrow(amm_shortdist)
+#0.9626282
+
+reduction_step <- data.frame(x = c(2022,2022,2023,2023,2024,2024,2025,2025,2026,2026,2027,2027,2028,2028,2029,2029, 2030), 
+y =c(1130100,1059117.289,1059117.289,988134.5778,988134.5778,917151.8667,917151.8667,846169.1556,	846169.1556,775186.4445,775186.4445,704203.7334,704203.7334,633221.0223,633221.0223,562245.5,562245.5))
+
 ```
 
 #Reduction goal untill 2030 562245.5kgCO2
@@ -466,6 +474,9 @@ total_co2_plot <- ggplot() +
             size=.75) +
   geom_line(data=uzh_target_co2_economy, 
             aes(x, y, color="target UZH all economy"), linetype="dotted",  
+            size=.75) +
+  geom_line(data=reduction_step, 
+            aes(x, y, color="reduction_step"), linetype="solid",  
             size=.75) +
   # geom_line(data=aggregated_uzh_economy, 
   #           aes(x=year, y=total_emission, color="optimal"),
@@ -489,8 +500,8 @@ total_co2_plot <- ggplot() +
                      limits=c(0,max_co2*1.02)) +
   ggtitle("UZH air travel (2018-2020): emissions")+
   scale_colour_manual("",
-                      breaks = c("target UZH", "target UZH all economy"),
-                      values = c(red,blue))+
+                      breaks = c("target UZH", "target UZH all economy", "reduction_step"),
+                      values = c(red,blue,green))+
   theme_light() +
   theme(text = element_text(size=16),
         axis.title.x = element_blank(),
@@ -502,7 +513,7 @@ total_co2_plot <- ggplot() +
 total_co2_plot
 
 ggsave(file="Figures/target_goal_plot.png", total_co2_plot,
-       width = 10,
+      width = 10,
        height= 7)
 ```
 
