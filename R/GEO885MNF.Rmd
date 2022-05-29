@@ -419,12 +419,12 @@ ggsave(file="Figures/emissions_comparison.png", all_emissions_plot,
 label1 <- paste0("1000km threshold")
 
 emission_distance_plot <- ggplot()+
-  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="yellow"), size = 1)+
-  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .4)+
-  geom_vline(xintercept = 1000, linetype="dotted", size=.5)+
+  geom_point(data = amm, aes(y= kgCO2km, x = distance_km, col="yellow"), size = 1, shape = 7)+
+  geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .5, shape = 19)+
+  geom_vline(xintercept = 1000, linetype="dotted", size=1)+
   scale_color_manual(labels = c("Economy modeled", "Observed"),
                      values = c("#00BA38", "#D55E00"))+
-  annotate("text", x = 3000, y = 1, label=label1, color=black, size=3) + 
+  annotate("text", x = 3000, y = 1, label=label1, color=black, size=5) + 
   ylab("kgCO2 emitted per flight km")+
   xlab("Flight distance [km]")+
   labs(colour = "Cabin class")+
