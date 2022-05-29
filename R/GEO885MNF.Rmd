@@ -457,6 +457,8 @@ mean(amm_shortdist$EMISSIONS_KGCO2EQ)
 2503.796/nrow(amm_shortdist)
 #0.9626282
 
+
+
 reduction_step <- data.frame(x = c(2022,2022,2023,2023,2024,2024,2025,2025,2026,2026,2027,2027,2028,2028,2029,2029, 2030), 
 y =c(1130100,1059117.289,1059117.289,988134.5778,988134.5778,917151.8667,917151.8667,846169.1556,	846169.1556,775186.4445,775186.4445,704203.7334,704203.7334,633221.0223,633221.0223,562245.5,562245.5))
 
@@ -525,6 +527,18 @@ paste("The mean emissions in kgCO2 per km flying for all economy flights is", me
 paste("The mean emissions in kgCO2 per km flying for regular flights is", mean(amm$kgCO2km))
 
 summary(amm)
+
+```
+
+```{r}
+nrow(amm)
+#5463 (im paper andere Zahl?)
+
+nrow(amm_shortdist)
+#2601 Kurzflüge
+
+nrow(amm_shortdist)/nrow(amm)
+#0.476 --> knapp 48% Kurzflüge 
 
 ```
 
