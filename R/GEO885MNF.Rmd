@@ -155,14 +155,14 @@ ggsave(file="Figures/flight_locations.png", arrdep,
 
 ZRH <- filter(amm, DEPARTURE_AIRPORT!="ZRH") 
 #create basemap
-map("world", fill=T, col="grey8", bg="grey15")
+map("world", fill=T, col="white", bg="white")
 #overlay airports
-points(amm$dep_lon, amm$dep_lat, pch=3, cex=0.1, col="chocolate1")+
-points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.1, col="chocolate1")
+points(amm$dep_lon, amm$dep_lat, pch=3, cex=0.2, col="#f4b41a")+
+points(amm$arr_lon, amm$arr_lat, pch=3, cex=0.3, col="#f4b41a")
 
 for (i in (1:dim(amm)[1])){
 inter <- gcIntermediate(c(amm$dep_lon[i], amm$dep_lat[i]), c(amm$arr_lon[i], amm$arr_lat[i]), breakAtDateLine = FALSE)
-lines(inter, lwd=0.1, col="turquoise2") 
+lines(inter, lwd=0.3, col="#143d59") 
 }
 
 ```
@@ -197,24 +197,7 @@ dep_ZH <- europe_arr %>% filter(DEPARTURE_AIRPORT == "ZRH") #All flights origina
 
 ```
 
-Create subset from world-df using the EUISO2-df and select all only European flights.
-```{r}
-arrdep_europe <-ggplot() +
-  geom_sf(data=europe_ohne_RU, aes(geometry = geometry))+
-  geom_sf(data = europe_dep, aes(geometry = dep_coordinates, col = "dep_coordinates"), size = 2, shape = 9) +
-  geom_sf(data = europe_arr, aes(geometry = arr_coordinates, col = "arr_coordinates"), size = .75, shape = 19) +
-  ggtitle("Departure and arrival locations for all european flights separated by symbols")+ xlab("Longitude") + ylab("Latitude")+
-  scale_color_manual(labels = c("Arrival", "Departure"),
-                     values = c("red", "blue"))+
-  labs(colour = "Flight path") +
-  theme(legend.position = "none")
-
-arrdep_europe
-
-ggsave(file="Figures/europe_flights.png", arrdep_europe,
-       width = 10,
-       height= 7)
-```
+Create subset from world-df using the EUISO2-df and select all only European flights. And create Model 1 and 2:
 
 ```{r Modell 1}
 interpolated <- interp(dep_ZH$arr_lon, dep_ZH$arr_lat, dep_ZH$EMISSIONS_KGCO2EQ, 
@@ -237,7 +220,8 @@ dep_ZH_plot_iso <- ggplot()+
   geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat), size = 1) +
   geom_point(data = dep_ZH, aes(x = dep_lon, y = dep_lat), col = "red", pch = 13, size = 2) +
   xlab("Longitude") + ylab("Latitude")+
-  guides(fill=guide_legend(title="Emission zones [kgCO2]"))
+  guides(fill=guide_legend(title="Emission zones [kgCO2]"))+
+  theme_minimal()
   
 dep_ZH_plot_iso
 
@@ -255,8 +239,9 @@ dep_ZH_plot_distance <- ggplot()+
   scale_fill_viridis_c(option = "bilbao",direction = -1, labs( colour=  "Count per country"))+
   geom_point(data = dep_ZH, aes(x = dep_lon, y = dep_lat), col = "red", pch = 13, size = 3) +
   geom_point(data = dep_ZH, aes(x = arr_lon, y = arr_lat), size = 2, col = "black") +
-  geom_circle(aes(y0 = 47.45806, x0 =8.548056, r = 11), geom = "circle", position = "identity", col = "red")+
-  xlab("Longitude") + ylab("Latitude")
+  geom_circle(aes(y0 = 47.45806, x0 =8.548056, r = 11), geom = "circle", position = "identity", col = "red", lwd = 1)+
+  xlab("Longitude") + ylab("Latitude")+
+  theme_minimal()
 
 dep_ZH_plot_distance
 
@@ -286,7 +271,6 @@ amm = amm[,!(names(amm) %in% drop)]
 
 ```{r compute baselines CO2}
 amm_economy <- read.csv(file.path(dataFolder, "amm_economy_complete.csv"), sep = ",")
-amm_business <- read.csv(file.path(dataFolder, "amm_business_complete.csv"), sep = ",")
 
 reference_period <- c(2018:2020)
 target_period <- c(2019, 2030)
@@ -335,7 +319,6 @@ max_co2 <- max(aggregated_uzh_regular$total_emission)
 amm <- amm %>% as.data.frame()
 amm <- amm %>% filter_all(all_vars(!is.infinite(kgCO2km))) %>% drop_na(kgCO2km)
 
-amm_business <- amm_business %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT)
 amm_economy <- amm_economy %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT)
 amm <- amm %>% filter(DEPARTURE_AIRPORT != ARRIVAL_AIRPORT)
 ```
@@ -352,7 +335,7 @@ eco2 <- ggplot() +
     ylab("emissions [kgCO2]") +
     scale_y_continuous(label=comma,
                        limits=c(0,max_distance*1.02)) +
-    theme_light() + 
+    theme_minimal() + 
     theme(legend.position = c(0.86, 0.7))
 eco2
 
@@ -363,12 +346,6 @@ ggsave(file="Figures/flight_class.png", eco2,
 
 ```{r}
 #Calculate emissions per cabinclass for altered data sets and merge with original to full list df
-emissions_per_class_business <- amm_business %>%
-  group_by(year, cabin_class) %>%
-  summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
-
-emissions_per_class_business$cabin_class[emissions_per_class_business$cabin_class == "business"] <- "all_business"
-
 emissions_per_class_economy <- amm_economy %>%
   group_by(year, cabin_class) %>%
   summarise(total_emissions = sum(EMISSIONS_KGCO2EQ))
@@ -394,11 +371,6 @@ emissions_per_class <- emissions_per_class %>% mutate(id = seq_along(year))
 
 
 ```{r}
-vec_re <- c(2,3,1,5,6,4,8,10,7,9)
-
-emissions_per_class <- emissions_per_class %>%
-  slice(match(vec_re, id))
-
 #Plot all three different data frames into one to compare emissions
 all_emissions_plot <- ggplot() + 
     geom_col(data = emissions_per_class, aes(y=total_emissions, x=year,group = fct_rev(fct_inorder(cabin_class)), fill = cabin_class), position="stack", stat="identity", width = .5)+
@@ -423,12 +395,12 @@ emission_distance_plot <- ggplot()+
   geom_point(data = amm_economy, aes(y= kgCO2km, x = distance_km, col="green"), size = .5, shape = 19)+
   geom_vline(xintercept = 1000, linetype="dotted", size=1)+
   scale_color_manual(labels = c("Economy modeled", "Observed"),
-                     values = c("#00BA38", "#D55E00"))+
+                     values = c("#00BA38", "#143d59"))+
   annotate("text", x = 3000, y = 1, label=label1, color=black, size=5) + 
-  ylab("kgCO2 emitted per flight km")+
+  ylab(expression("kgCO"[2]*"/km"))+
   xlab("Flight distance [km]")+
   labs(colour = "Cabin class")+
-  theme_light()
+  theme_minimal()
 
 emission_distance_plot
 
@@ -529,16 +501,3 @@ paste("The mean emissions in kgCO2 per km flying for regular flights is", mean(a
 summary(amm)
 
 ```
-
-```{r}
-nrow(amm)
-#5463 (im paper andere Zahl?)
-
-nrow(amm_shortdist)
-#2601 Kurzflüge
-
-nrow(amm_shortdist)/nrow(amm)
-#0.476 --> knapp 48% Kurzflüge 
-
-```
-
