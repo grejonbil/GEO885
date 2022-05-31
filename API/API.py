@@ -83,7 +83,6 @@ def retrieve_emissions(origin, destination, cabin_class, currencies):
     return footprint
 
 amm = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_incomplete.csv")
-amm_business = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business.csv")
 amm_economy = pd.read_csv("/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy.csv")
 
 
@@ -99,19 +98,12 @@ amm['EMISSIONS_KGCO2EQ'] = amm.apply(lambda x: retrieve_emissions(origin=x.DEPAR
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
 
-amm_business['EMISSIONS_KGCO2EQ'] = amm_business.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
-                                                                  destination=x.ARRIVAL_AIRPORT,
-                                                                  cabin_class=x.cabin_class,
-                                                                  currencies=x.currencies), axis=1)
-
 amm_economy['EMISSIONS_KGCO2EQ'] = amm_economy.apply(lambda x: retrieve_emissions(origin=x.DEPARTURE_AIRPORT,
                                                                   destination=x.ARRIVAL_AIRPORT,
                                                                   cabin_class=x.cabin_class,
                                                                   currencies=x.currencies), axis=1)
 
 amm.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_complete.csv", index=False)
-
-amm_business.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_business_complete.csv", index=False)
 amm_economy.to_csv(r"/Users/chaualala/Desktop/UZH/MSc Geographie/2. Semester/GEO885 - GIS Science Project/GEO885/R/amm_economy_complete.csv", index=False)
 
 toc = time.perf_counter()
